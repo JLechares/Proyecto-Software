@@ -40,9 +40,9 @@ using (var scope = app.Services.CreateScope())
         {
             var evento = new EVENT
             {
-                Name = "Final de Software UNAJ",
+                Name = "Piratas del caribe",
                 EventDate = DateTime.Now.AddDays(30),
-                Venue = "Auditorio Central",
+                Venue = "Sala 1",
                 Status = "Active" // El campo requerido para evitar errores.
             };
 
