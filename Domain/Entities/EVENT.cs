@@ -10,7 +10,7 @@ namespace Domain.Entities
     {
         [Key] // Primary key
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Auto-incrementing ID
-        public int ID { get; set; }
+        public int Id { get; set; }
         public required string Name { get; set; }
 
         public DateTime EventDate { get; set; }
@@ -19,6 +19,6 @@ namespace Domain.Entities
 
         public required string Status { get; set; }
 
-        public virtual ICollection<SECTOR> Sectors { get; set; }
+        public virtual ICollection<SECTOR> Sectors { get; set; } = new List<SECTOR>();
     }
 }

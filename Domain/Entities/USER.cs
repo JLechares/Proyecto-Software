@@ -17,7 +17,7 @@ namespace Domain.Entities
 
         public required string PasswordHash { get; set; }
 
-        public virtual ICollection<AUDIT_LOG> AuditLogs { get; set; }
-        public virtual ICollection<RESERVATION> Reservations { get; set; }
+        public virtual ICollection<AUDIT_LOG> AuditLogs { get; set; } = new List<AUDIT_LOG>();
+        public virtual ICollection<RESERVATION> Reservations { get; set; } = new List<RESERVATION>();
     }
 }

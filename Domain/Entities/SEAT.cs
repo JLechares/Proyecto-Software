@@ -21,6 +21,6 @@ namespace Domain.Entities
         public required string Status { get; set; }
         public int Version { get; set; }
 
-        public virtual ICollection<RESERVATION> Reservations { get; set; }
+        public virtual ICollection<RESERVATION> Reservations { get; set; } = new List<RESERVATION>();
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace Infraestructure.Persistence
@@ -11,6 +12,28 @@ namespace Infraestructure.Persistence
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+        static string databaseName = "EventReservationDB.db";
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite($"Filename={databaseName}", options =>
+            {
+                options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
+            });
+
+            base.OnConfiguring(optionsBuilder);
+        }
+        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite(connectionString: "Filename=" + databaseName,
+                sqliteOptionsAction: op =>
+                {
+                    op.MigrationsAssembly(
+                        Assembly.GetExecutingAssembly().FullName
+                        );
+                });
+            base.OnConfiguring(optionsBuilder);
+        }*/
 
         // DbSet properties for each entity
         public DbSet<Domain.Entities.USER> USERS { get; set; }
@@ -22,13 +45,82 @@ namespace Infraestructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //REMOVE THE PROBLEM OF THE PLURAL BEING ADDED TO TABLES
-            modelBuilder.Entity<USER>().ToTable("USER");
-            modelBuilder.Entity<RESERVATION>().ToTable("RESERVATION");
-            modelBuilder.Entity<SEAT>().ToTable("SEAT");
-            modelBuilder.Entity<SECTOR>().ToTable("SECTOR");
-            modelBuilder.Entity<EVENT>().ToTable("EVENT");
-            modelBuilder.Entity<AUDIT_LOG>().ToTable("AUDIT_LOG");
+            // Configure entity relationships and constraints
+            modelBuilder.Entity<EVENT>(entity =>
+            {
+                entity.ToTable("EVENT");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                // An Event can have many Sectors
+                entity.HasMany(e => e.Sectors)
+                      .WithOne(s => s.Event)
+                      .HasForeignKey(s => s.EventId);
+            });
+            modelBuilder.Entity<SECTOR>(entity =>
+            {
+                entity.ToTable("SECTOR");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                // A Sector can have many Seats
+                entity.HasMany(s => s.Seats)
+                      .WithOne(seat => seat.Sector)
+                      .HasForeignKey(seat => seat.SectorId);
+
+            });
+            modelBuilder.Entity<SEAT>(entity =>
+            {
+                entity.ToTable("SEAT");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                      .ValueGeneratedOnAdd();
+                entity.Property(s => s.Version);
+            });
+            modelBuilder.Entity<RESERVATION>(entity =>
+            {
+                entity.ToTable("RESERVATION");
+                entity.HasKey(e => e.Id); 
+                entity.Property(s=>s.Id)
+                      .ValueGeneratedOnAdd();
+
+                // One Seat can have multiple Reservations over time
+                entity.HasOne(r=>r.Seat)
+                      .WithMany(s => s.Reservations)
+                      .HasForeignKey(r => r.SeatId);
+
+                entity.HasOne(r => r.User)
+                      .WithMany(u => u.Reservations)
+                      .HasForeignKey(r => r.UserId);
+            });
+
+            modelBuilder.Entity<USER>(entity =>
+            {
+                entity.ToTable("USER");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+               
+
+                // A User can perform many Reservations
+                entity.HasMany(u => u.Reservations)
+                      .WithOne(r => r.User)
+                      .HasForeignKey(r => r.UserId);
+
+            });
+            modelBuilder.Entity<AUDIT_LOG>(entity =>
+            {
+                entity.ToTable("AUDIT_LOG");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                      .ValueGeneratedOnAdd(); 
+
+                // An AuditLog is associated with a User (optional)
+                entity.HasOne(a => a.User)
+                      .WithMany(u => u.AuditLogs)
+                      .HasForeignKey(a => a.UserId)
+                      .IsRequired(false);
+
+            });
         }
     }
 }

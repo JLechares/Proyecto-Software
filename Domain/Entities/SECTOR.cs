@@ -21,6 +21,6 @@ namespace Domain.Entities
         public decimal Price { get; set; }
 
         public int Capacity { get; set; }
-        public virtual ICollection<SEAT> Seats { get; set; }
+        public virtual ICollection<SEAT> Seats { get; set; } = new List<SEAT>();
     }
 }
