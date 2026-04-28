@@ -8,8 +8,6 @@ namespace Domain.Entities
 {
     public class USER
     {
-        [Key] // Primary key
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public required string Name { get; set; }
 

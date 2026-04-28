@@ -8,8 +8,6 @@ namespace Domain.Entities
 {
     public class EVENT
     {
-        [Key] // Primary key
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Auto-incrementing ID
         public int Id { get; set; }
         public required string Name { get; set; }
 

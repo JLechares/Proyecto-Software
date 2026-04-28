@@ -16,7 +16,6 @@ namespace Proyecto_Software.Controllers
             _context = context;
         }
 
-        // Endpoint para ver el catálogo (Punto 2 de la entrega)
         [HttpGet]
         public async Task<IActionResult> GetEvents()
         {

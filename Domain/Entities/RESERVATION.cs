@@ -8,16 +8,13 @@ namespace Domain.Entities
 {
     public class RESERVATION
     {
-        [Key]
         public Guid Id { get; set; }
         public int UserId { get; set; }
 
-        [ForeignKey("UserId")]
-        public virtual USER User { get; set; }
+        public required virtual USER User { get; set; }
 
         public Guid SeatId { get; set; }
-        [ForeignKey("SeatId")]
-        public virtual SEAT Seat { get; set; }
+        public required virtual SEAT Seat { get; set; }
 
         public required string Status { get; set; }
 
@@ -25,6 +22,5 @@ namespace Domain.Entities
 
         public DateTime ExpiresAt { get; set; }
 
-        
     }
 }

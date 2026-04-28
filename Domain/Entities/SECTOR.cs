@@ -8,12 +8,8 @@ namespace Domain.Entities
 {
     public class SECTOR
     {
-        [Key] // Primary key
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Auto-incrementing ID
         public int Id { get; set; }
         public int EventId { get; set; }
-
-        [ForeignKey("EventId")] // Foreign key to the EVENT table
         public virtual EVENT Event { get; set; }
 
         public required string Name { get; set; }
