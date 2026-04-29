@@ -28,7 +28,7 @@ namespace Proyecto_Software.Controllers
             _reserveSeatHandler = reserveSeatHandler;
         }
 
-        [HttpGet]
+        [HttpGet("v1/events")]
         public async Task<IActionResult> GetAllEvents()
         {
             var query = new GetAllEventsQuery();
@@ -36,6 +36,27 @@ namespace Proyecto_Software.Controllers
             return Ok(events);
         }
 
-        
+        [HttpGet("v1/{eventId}/sectors")]
+        public async Task<IActionResult> GetSectors(int eventId)
+        {
+            var query = new GetSectorsByEventQuery(eventId);
+
+            var result = await _getSectorsByEventHandler.HandleAsync(query);
+
+            return Ok(result);
+        }
+
+        [HttpGet("{eventId}/sectors/{sectorId}/seats")]
+        public async Task<IActionResult> GetSeats(int eventId, int sectorId)
+        {
+            var query = new GetSeatsStatusQuery(eventId, sectorId);
+            var result = await _getSeatsStatusHandler.HandleAsync(query);
+
+            if (result == null || !result.Any())
+                return NotFound($"No se encontraron asientos para el sector {sectorId} en el evento {eventId}");
+
+            return Ok(result);
+        }
+
     }
 }

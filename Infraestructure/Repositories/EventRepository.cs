@@ -37,12 +37,14 @@ namespace Infraestructure.Repositories
 
         public async Task<IEnumerable<SEAT>> GetSeatsBySectorIdAsync(int sectorId)
         {
-            throw new NotImplementedException();
+            return await _appDbContext.SEATS
+            .Where(s => s.SectorId == sectorId)
+            .ToListAsync();
         }
 
         public async Task<IEnumerable<SECTOR>> GetSectorsByEventAsync(int eventId)
         {
-            throw new NotImplementedException();
+            return await _appDbContext.SECTORS.Where(s => s.EventId == eventId).ToListAsync();
         }
 
         public async Task<bool> SaveChangesAsync()
