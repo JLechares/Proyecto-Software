@@ -11,7 +11,7 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public int SectorId { get; set; }
 
-        public virtual SECTOR Sector { get; set; }
+        public required virtual SECTOR Sector { get; set; }
         public required string RowIdentifier { get; set; }
 
         public int SeatNumber { get; set; }

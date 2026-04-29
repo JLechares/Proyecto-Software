@@ -1,5 +1,6 @@
 ﻿using Infraestructure.Persistence;
 using Microsoft.AspNetCore.Http;
+using Application.Interfaces;   
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,22 +10,23 @@ namespace Proyecto_Software.Controllers
     [ApiController]
     public class EventsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IGetAllEventsQueryHandler _getAllEventsHandler;
+        private readonly IGetSeatsStatusQueryHandler _getSeatsStatusHandler;
+        private readonly IGetSectorsByEventQueryHandler _getSectorsByEventHandler;
+        private readonly IReserveSeatCommandHandler _reserveSeatHandler;
 
-        public EventsController(AppDbContext context)
+        public EventsController(
+            IGetAllEventsQueryHandler getAllEventsHandler,
+            IGetSeatsStatusQueryHandler getSeatsStatusHandler,
+            IGetSectorsByEventQueryHandler getSectorsByEventHandler,
+            IReserveSeatCommandHandler reserveSeatHandler)
         {
-            _context = context;
+            _getAllEventsHandler = getAllEventsHandler;
+            _getSeatsStatusHandler = getSeatsStatusHandler;
+            _getSectorsByEventHandler = getSectorsByEventHandler;
+            _reserveSeatHandler = reserveSeatHandler;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetEvents()
-        {
-            var events = await _context.EVENTS
-                .Include(e => e.Sectors)
-                .ThenInclude(s => s.Seats)
-                .ToListAsync();
-
-            return Ok(events);
-        }
+        
     }
 }

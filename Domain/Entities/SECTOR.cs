@@ -10,7 +10,7 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
         public int EventId { get; set; }
-        public virtual EVENT Event { get; set; }
+        public required virtual EVENT Event { get; set; }
 
         public required string Name { get; set; }
 
