@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Application.Interfaces;   
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Application.UseCases.Events.Queries;
 
 namespace Proyecto_Software.Controllers
 {
@@ -25,6 +26,14 @@ namespace Proyecto_Software.Controllers
             _getSeatsStatusHandler = getSeatsStatusHandler;
             _getSectorsByEventHandler = getSectorsByEventHandler;
             _reserveSeatHandler = reserveSeatHandler;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllEvents()
+        {
+            var query = new GetAllEventsQuery();
+            var events = await _getAllEventsHandler.HandleAsync(query);
+            return Ok(events);
         }
 
         

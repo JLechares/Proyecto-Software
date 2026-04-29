@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Application.UseCases.Events.Queries;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,9 +9,23 @@ namespace Application.UseCases.Events.Handlers
 {
     public class GetAllEventsHandler : IGetAllEventsQueryHandler
     {
-        public Task<IEnumerable<EventResponse>> HandleAsync()
+        private readonly IEventRepository _eventRepository;
+
+        public GetAllEventsHandler(IEventRepository eventRepository)
         {
-            throw new NotImplementedException();
+            _eventRepository = eventRepository;
+        }
+        public async Task<IEnumerable<EventResponse>> HandleAsync(GetAllEventsQuery query)
+        {
+            var events = await _eventRepository.GetAllEventsAsync();
+            return events.Select(e => new EventResponse
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Date = e.EventDate,
+                Venue = e.Venue,
+                Status = e.Status
+            });
         }
     }
 }
