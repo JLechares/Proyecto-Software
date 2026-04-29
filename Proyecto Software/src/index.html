@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+    </style>
+</head>
+<body style="background-color:black">
+    <header style="background-image: url('./assets/img/headerBackground.png'); height: 300px; width: 100%; display: flex; flex-direction: column; justify-content: center; padding: 2rem;">
+        <div>
+            <h1 style="color:white">
+                Reserva un evento
+            </h1>
+        </div>
+        
+        <div>
+            <p style="color: white">Seleccioná el evento que deseas reservar y contanos el propósito de tu reserva</p>
+        </div>
+    </header>
+    <main style="background-color: #0B1220; margin: 2rem; padding: 2rem; border-radius: 20px;">
+        <article style="margin: 2rem;">
+            <h4 style="color: white;">Seleccioná tu evento</h4>
+            <p style="color: white;">Elegi el evento que deseas reservar de la lista disponible.</p>
+        </article>
+        <div class="card" style="width: 18rem; margin: 2rem; cursor: pointer; background-color: #0B1220; color: white; border: 2px solid violet; border-radius: 10px;">
+            <div class="card-body">
+                <img src="./assets/img/headerBackground.png" class="card-img-top" alt="...">
+                <h5 class="card-text">Coldplay</h5>
+                <h6 class="card-text">Music of the spheres World Tour</h6>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; flex-direction: row; align-items: center;">
+                    <i style="margin-right:2rem;" class="bi bi-calendar-event"></i><span class="card-text">Essssstadio unico de la plata</span>
+                </div>
+                <div style="display: flex; flex-direction: row; align-items: center;">
+                    <i style="margin-right:2rem;" class="bi bi-geo-alt"></i><span class="card-text">Essssssstadio unico de la plata</span>
+                </div>
+                <div style="display: flex; flex-direction: row; align-items: center;">
+                    <i style="margin-right:2rem;" class="bi bi-clock"></i><span class="card-text">Essssstadio unico de la plata</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer style="display:flex; justify-content:center;align-items:center; ">
+        <button type="button" style="padding:1rem; background-color:violet;" class="btn btn-primary">Continuar a Selección de Asientos</button>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
