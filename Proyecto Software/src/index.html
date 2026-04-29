@@ -1,53 +1,71 @@
-﻿<!DOCTYPE html>
+﻿﻿
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <title></title>
+    <link rel="stylesheet" href="./assets/css/index.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
     </style>
+    <script src="./assets/js/index.js" defer></script>
 </head>
 <body style="background-color:black">
-    <header style="background-image: url('./assets/img/headerBackground.png'); height: 300px; width: 100%; display: flex; flex-direction: column; justify-content: center; padding: 2rem;">
+    <header style="background-image: url('./assets/img/headerBackground.png'); height: 200px; width: 100%; display: flex; flex-direction: column; justify-content: center; padding: 2rem;">
         <div>
             <h1 style="color:white">
                 Reserva un evento
             </h1>
         </div>
-        
+
         <div>
             <p style="color: white">Seleccioná el evento que deseas reservar y contanos el propósito de tu reserva</p>
         </div>
     </header>
-    <main style="background-color: #0B1220; margin: 2rem; padding: 2rem; border-radius: 20px;">
+    <main id="main-content" style="background-color: #0B1220; margin: 2rem; padding: 2rem; border-radius: 20px; width:50%;">
         <article style="margin: 2rem;">
             <h4 style="color: white;">Seleccioná tu evento</h4>
             <p style="color: white;">Elegi el evento que deseas reservar de la lista disponible.</p>
         </article>
-        <div class="card" style="width: 18rem; margin: 2rem; cursor: pointer; background-color: #0B1220; color: white; border: 2px solid violet; border-radius: 10px;">
-            <div class="card-body">
-                <img src="./assets/img/headerBackground.png" class="card-img-top" alt="...">
-                <h5 class="card-text">Coldplay</h5>
-                <h6 class="card-text">Music of the spheres World Tour</h6>
+        <div id="card-coldplay" class="card event-card" style="width: 18rem; margin: 2rem; cursor: pointer; background-color: #0B1220; color: white; border: 1px solid #333; border-radius: 15px; overflow: hidden; font-family: sans-serif;">
+            <div style="position: relative;">
+                <img src="./assets/img/headerBackground.png" class="card-img-top" alt="Coldplay" style="display: block;">
+                <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 8px; text-align: center; line-height: 1.2;">
+                    <div style="font-weight: bold; font-size: 1.1rem;">15</div>
+                    <div style="font-size: 0.7rem; color: #ccc; text-transform: uppercase;">Jun</div>
+                </div>
+                <div class="check-badge" style="position: absolute; top: 10px; right: 10px; background: white; color: #0B1220; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
+                    <i class="bi bi-check-lg"></i>
+                </div>
             </div>
-            <div class="card-body">
-                <div style="display: flex; flex-direction: row; align-items: center;">
-                    <i style="margin-right:2rem;" class="bi bi-calendar-event"></i><span class="card-text">Essssstadio unico de la plata</span>
+
+            <div class="card-body" style="padding: 1.2rem 1.2rem 0.5rem 1.2rem;">
+                <h5 class="card-title" style="margin-bottom: 0.2rem; font-weight: bold; font-size: 1.2rem;">Coldplay</h5>
+                <h6 class="card-subtitle" style="color: #8e94a5; font-weight: normal; font-size: 0.9rem;">Music of the Spheres World Tour</h6>
+            </div>
+
+            <div class="card-body" style="padding: 0.5rem 1.2rem 1.2rem 1.2rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                <div style="display: flex; align-items: center; color: #8e94a5;">
+                    <i class="bi bi-geo-alt" style="width: 25px;"></i>
+                    <span style="font-size: 0.9rem;">Estadio Único de La Plata</span>
                 </div>
-                <div style="display: flex; flex-direction: row; align-items: center;">
-                    <i style="margin-right:2rem;" class="bi bi-geo-alt"></i><span class="card-text">Essssssstadio unico de la plata</span>
+                <div style="display: flex; align-items: center; color: #8e94a5;">
+                    <i class="bi bi-calendar-event" style="width: 25px;"></i>
+                    <span style="font-size: 0.9rem;">15 de Junio, 2024</span>
                 </div>
-                <div style="display: flex; flex-direction: row; align-items: center;">
-                    <i style="margin-right:2rem;" class="bi bi-clock"></i><span class="card-text">Essssstadio unico de la plata</span>
+                <div style="display: flex; align-items: center; color: #8e94a5; margin-bottom: 0.5rem;">
+                    <i class="bi bi-clock" style="width: 25px;"></i>
+                    <span style="font-size: 0.9rem;">20:00 hs</span>
+                </div>
+
+                <div style="background-color: #242731; color: #d1d4dc; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; width: fit-content;">
+                    Concierto
                 </div>
             </div>
         </div>
     </main>
-    <footer style="display:flex; justify-content:center;align-items:center; ">
-        <button type="button" style="padding:1rem; background-color:violet;" class="btn btn-primary">Continuar a Selección de Asientos</button>
-    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>

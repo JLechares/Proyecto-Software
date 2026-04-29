@@ -1,0 +1,36 @@
+﻿/* Estado base de la card */
+.event-card {
+    transition: all 0.3s ease;
+    border: 1px solid #333 !important; /* Borde normal */
+}
+
+/* Ocultamos el check por defecto */
+.check-badge {
+    display: none !important;
+}
+
+/* Estilos cuando la card tiene la clase 'selected' */
+.event-card.selected {
+    border: 2px solid #a855f7 !important; /* Borde flúor (Violeta/Fucsia) */
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); /* Efecto de resplandor */
+}
+
+    .event-card.selected .check-badge {
+        display: flex !important; /* Mostramos el check solo cuando está seleccionada */
+    }
+
+/* El check estará oculto por defecto */
+.check-badge {
+    display: none !important; /* Usamos !important para sobreescribir el flex del inline style */
+}
+
+/* Solo cuando el padre (la card) tenga la clase 'selected', el check se muestra */
+.card.selected .check-badge {
+    display: flex !important;
+}
+
+/* El borde flúor que querías */
+.card.selected {
+    border: 2px solid #a855f7 !important;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
