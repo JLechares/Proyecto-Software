@@ -17,7 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="src\assets\img\" />
+    <None Include="wwwroot\assets\css\index.css" />
+    <None Include="wwwroot\assets\img\headerBackground.png" />
+    <None Include="wwwroot\assets\js\index.js" />
+    <None Include="wwwroot\index.html" />
+    <None Include="wwwroot\screenView.html" />
   </ItemGroup>
 
 </Project>
