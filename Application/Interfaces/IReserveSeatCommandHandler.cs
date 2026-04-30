@@ -8,6 +8,6 @@ namespace Application.Interfaces
 {
     public interface IReserveSeatCommandHandler
     {
-        Task<CommandResult> HandleAsync(ReserveSeatCommand command);
+        Task<ReserveSeatResponse> HandleAsync(ReserveSeatCommand command);
     }
 }

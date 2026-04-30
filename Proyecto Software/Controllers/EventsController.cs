@@ -1,9 +1,11 @@
-﻿using Infraestructure.Persistence;
-using Microsoft.AspNetCore.Http;
+﻿using Application.DTOs;
 using Application.Interfaces;   
+using Application.UseCases.Events.Commands;
+using Application.UseCases.Events.Queries;
+using Infraestructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Application.UseCases.Events.Queries;
 
 namespace Proyecto_Software.Controllers
 {
@@ -57,6 +59,28 @@ namespace Proyecto_Software.Controllers
 
             return Ok(result);
         }
+        [HttpPost("reserve-seat")]
+        public async Task<IActionResult> ReserveSeat(ReserveSeatResponse response)
+        {
+            try
+            {
+                var command = new ReserveSeatCommand
+                {
+                    SeatId = response.SeatId,
+                    UserId = response.UserId
+                };
 
+                var result = await _reserveSeatHandler.HandleAsync(command);
+
+                return StatusCode(201, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

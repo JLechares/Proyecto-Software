@@ -17,12 +17,12 @@ namespace Infraestructure.Repositories
         }
         public async Task AddAuditLogAsync(AUDIT_LOG log)
         {
-            throw new NotImplementedException();
+            await _appDbContext.AUDIT_LOGS.AddAsync(log);
         }
 
         public async Task AddReservationAsync(RESERVATION reservation)
         {
-            throw new NotImplementedException();
+            await _appDbContext.RESERVATIONS.AddAsync(reservation);
         }
 
         public async Task<IEnumerable<EVENT>> GetAllEventsAsync()
@@ -30,9 +30,9 @@ namespace Infraestructure.Repositories
             return await _appDbContext.EVENTS.ToListAsync();
         }
 
-        public async Task<SEAT?> GetSeatByIdAsync(int seatId)
+        public async Task<SEAT?> GetSeatByIdAsync(Guid seatId)
         {
-            throw new NotImplementedException();
+            return await _appDbContext.SEATS.FirstOrDefaultAsync(s => s.Id == seatId);
         }
 
         public async Task<IEnumerable<SEAT>> GetSeatsBySectorIdAsync(int sectorId)
@@ -49,12 +49,12 @@ namespace Infraestructure.Repositories
 
         public async Task<bool> SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            return await _appDbContext.SaveChangesAsync() > 0;
         }
 
         public void UpdateSeat(SEAT seat)
         {
-            throw new NotImplementedException();
+            _appDbContext.SEATS.Update(seat);
         }
     }
 }

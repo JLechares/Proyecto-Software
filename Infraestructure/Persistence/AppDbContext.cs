@@ -23,17 +23,6 @@ namespace Infraestructure.Persistence
 
             base.OnConfiguring(optionsBuilder);
         }
-        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite(connectionString: "Filename=" + databaseName,
-                sqliteOptionsAction: op =>
-                {
-                    op.MigrationsAssembly(
-                        Assembly.GetExecutingAssembly().FullName
-                        );
-                });
-            base.OnConfiguring(optionsBuilder);
-        }*/
 
         // DbSet properties for each entity
         public DbSet<Domain.Entities.USER> USERS { get; set; }
@@ -45,14 +34,12 @@ namespace Infraestructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure entity relationships and constraints
             modelBuilder.Entity<EVENT>(entity =>
             {
                 entity.ToTable("EVENT");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                // An Event can have many Sectors
                 entity.HasMany(e => e.Sectors)
                       .WithOne(s => s.Event)
                       .HasForeignKey(s => s.EventId);
@@ -84,7 +71,6 @@ namespace Infraestructure.Persistence
                 entity.Property(s=>s.Id)
                       .ValueGeneratedOnAdd();
 
-                // One Seat can have multiple Reservations over time
                 entity.HasOne(r=>r.Seat)
                       .WithMany(s => s.Reservations)
                       .HasForeignKey(r => r.SeatId);
@@ -100,8 +86,6 @@ namespace Infraestructure.Persistence
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                
-
-                // A User can perform many Reservations
                 entity.HasMany(u => u.Reservations)
                       .WithOne(r => r.User)
                       .HasForeignKey(r => r.UserId);
@@ -114,7 +98,7 @@ namespace Infraestructure.Persistence
                 entity.Property(e => e.Id)
                       .ValueGeneratedOnAdd(); 
 
-                // An AuditLog is associated with a User (optional)
+               
                 entity.HasOne(a => a.User)
                       .WithMany(u => u.AuditLogs)
                       .HasForeignKey(a => a.UserId)

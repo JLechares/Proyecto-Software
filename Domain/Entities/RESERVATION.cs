@@ -11,7 +11,7 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public int UserId { get; set; }
 
-        public required virtual USER User { get; set; }
+        public required virtual USER? User { get; set; }
 
         public Guid SeatId { get; set; }
         public required virtual SEAT Seat { get; set; }
@@ -20,7 +20,7 @@ namespace Domain.Entities
 
         public DateTime ReservedAt { get; set; }
 
-        public DateTime ExpiresAt { get; set; }
+        public DateTime ExpiresAt { get; set; } 
 
     }
 }

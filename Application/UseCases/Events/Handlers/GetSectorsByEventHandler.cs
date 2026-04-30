@@ -23,6 +23,7 @@ namespace Application.UseCases.Events.Handlers
                 Id = s.Id,
                 EventId = s.EventId,
                 Name = s.Name,
+                Price = s.Price,
                 Capacity = s.Capacity
             });
         }

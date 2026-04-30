@@ -3,6 +3,7 @@ using Application.UseCases.Events.Handlers;
 using Domain.Entities;
 using Infraestructure.Persistence;
 using Infraestructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
 //custom
 builder.Services.AddScoped<IGetAllEventsQueryHandler, GetAllEventsHandler>();
 builder.Services.AddScoped<IGetSectorsByEventQueryHandler, GetSectorsByEventHandler>();
@@ -31,6 +34,7 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddDbContext<AppDbContext>();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
