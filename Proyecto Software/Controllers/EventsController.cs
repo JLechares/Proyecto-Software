@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Proyecto_Software.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class EventsController : ControllerBase
     {
@@ -48,7 +48,7 @@ namespace Proyecto_Software.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{eventId}/sectors/{sectorId}/seats")]
+        [HttpGet("v1/{eventId}/sectors/{sectorId}/seats")]
         public async Task<IActionResult> GetSeats(int eventId, int sectorId)
         {
             var query = new GetSeatsStatusQuery(eventId, sectorId);
@@ -59,8 +59,8 @@ namespace Proyecto_Software.Controllers
 
             return Ok(result);
         }
-        [HttpPost("reserve-seat")]
-        public async Task<IActionResult> ReserveSeat(ReserveSeatResponse response)
+        [HttpPost("v1/reservations")]
+        public async Task<IActionResult> ReserveSeat([FromBody] ReserveSeatResponse response)
         {
             try
             {

@@ -17,7 +17,7 @@ namespace Application.UseCases.Events.Handlers
 
         public async Task<IEnumerable<SeatResponse>> HandleAsync(GetSeatsStatusQuery query)
         {
-            var seats = await _eventRepository.GetSeatsBySectorIdAsync(query.SectorId);
+            var seats = await _eventRepository.GetSeatsByEventAndSectorAsync(query.EventId, query.SectorId);
 
             return seats.Select(s => new SeatResponse
             {

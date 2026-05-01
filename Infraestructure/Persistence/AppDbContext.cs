@@ -24,7 +24,6 @@ namespace Infraestructure.Persistence
             base.OnConfiguring(optionsBuilder);
         }
 
-        // DbSet properties for each entity
         public DbSet<Domain.Entities.USER> USERS { get; set; }
         public DbSet<Domain.Entities.RESERVATION> RESERVATIONS { get; set; }
         public DbSet<Domain.Entities.SEAT> SEATS { get; set; }

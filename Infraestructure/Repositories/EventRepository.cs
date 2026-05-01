@@ -35,11 +35,12 @@ namespace Infraestructure.Repositories
             return await _appDbContext.SEATS.FirstOrDefaultAsync(s => s.Id == seatId);
         }
 
-        public async Task<IEnumerable<SEAT>> GetSeatsBySectorIdAsync(int sectorId)
+        public async Task<IEnumerable<SEAT>> GetSeatsByEventAndSectorAsync(int eventId, int sectorId)
         {
             return await _appDbContext.SEATS
-            .Where(s => s.SectorId == sectorId)
-            .ToListAsync();
+                .Where(s => s.SectorId == sectorId && _appDbContext.SECTORS
+                    .Any(sec => sec.Id == sectorId && sec.EventId == eventId))
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<SECTOR>> GetSectorsByEventAsync(int eventId)

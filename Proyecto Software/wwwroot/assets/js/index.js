@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("events-container");
 
     try {
-        const response = await fetch("/api/Events/v1/events");
+        const response = await fetch("/api/v1/events");
        
 
         if (!response.ok) {
@@ -22,12 +22,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function getSectors(eventId) {
-    const response = await fetch(`/api/Events/v1/${eventId}/sectors`);
+    const response = await fetch(`/api/v1/${eventId}/sectors`);
     return await response.json();
 }
 
 async function getSeats(eventId, sectorId) {
-    const response = await fetch(`/api/Events/${eventId}/sectors/${sectorId}/seats`);
+    const response = await fetch(`/api/v1/${eventId}/sectors/${sectorId}/seats`);
     return await response.json();
 }
 
@@ -342,12 +342,50 @@ async function generateSeats(eventId) {
 
 
     const confirmBtn = document.getElementById("confirmBtn");
+
     if (confirmBtn) {
-        confirmBtn.onclick = () => {
+        confirmBtn.onclick = async () => {
             if (selectedSeats.length === 0) {
                 alert("Selecciona al menos un asiento");
+                return;
+            }
+
+            // Usamos una variable para contar cuántas reservas salieron bien
+            let successCount = 0;
+
+            // Recorremos cada ID seleccionado para crear las reservaciones una por una
+            for (const id of selectedSeats) {
+                try {
+                    const response = await fetch("/api/v1/reservations", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        // Estructura exacta de la foto: userId 0 y el seatId correspondiente
+                        body: JSON.stringify({
+                            userId: 0,
+                            seatId: id
+                        })
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        console.error(`Fallo al reservar el asiento: ${id}`);
+                    }
+                } catch (error) {
+                    console.error("Error de red:", error);
+                }
+            }
+
+            // Feedback final al usuario
+            if (successCount === selectedSeats.length) {
+                alert("¡Todas tus reservas se realizaron con éxito!");
+                // Aquí podrías limpiar el carrito y volver al inicio
+                selectedSeats = [];
+                location.reload();
             } else {
-                alert("Asientos a comprar: " + selectedSeats.join(", "));
+                alert(`Se reservaron ${successCount} de ${selectedSeats.length} asientos. Revisa la consola.`);
             }
         };
     }

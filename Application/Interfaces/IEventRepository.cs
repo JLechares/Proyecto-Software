@@ -9,7 +9,7 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<EVENT>> GetAllEventsAsync();
         Task<IEnumerable<SECTOR>> GetSectorsByEventAsync(int eventId);
-        Task<IEnumerable<SEAT>> GetSeatsBySectorIdAsync(int sectorId);
+        Task<IEnumerable<SEAT>> GetSeatsByEventAndSectorAsync(int eventId, int sectorId);
         Task<SEAT?> GetSeatByIdAsync(Guid seatId);
 
         void UpdateSeat(SEAT seat);
