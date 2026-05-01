@@ -1,6 +1,6 @@
 # 🎟️ Proyecto Software - Sistema de Gestión de Eventos
 
-Este proyecto es una API desarrollada en **.NET 8** para la gestión de eventos, sectores y reserva de asientos (butacas).  
+Este proyecto es una API desarrollada en **.NET 10** para la gestión de eventos, sectores y reserva de asientos (butacas).  
 Permite consultar información de eventos, visualizar disponibilidad y realizar reservas.
 
 ---

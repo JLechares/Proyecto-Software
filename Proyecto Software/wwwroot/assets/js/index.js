@@ -1,8 +1,11 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
+﻿let selectedSeats = []; 
+
+document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("events-container");
 
     try {
         const response = await fetch("/api/Events/v1/events");
+       
 
         if (!response.ok) {
             throw new Error("Error al obtener eventos");
@@ -16,6 +19,16 @@
         container.innerHTML = "<p>Error cargando eventos</p>";
     }
 });
+
+async function getSectors(eventId) {
+    const response = await fetch(`/api/Events/v1/${eventId}/sectors`);
+    return await response.json();
+}
+
+async function getSeats(eventId, sectorId) {
+    const response = await fetch(`/api/Events/${eventId}/sectors/${sectorId}/seats`);
+    return await response.json();
+}
 
 function renderEvents(events, container) {
     container.innerHTML = "";
@@ -72,7 +85,7 @@ function renderEvents(events, container) {
         `;
         container.appendChild(card);
         card.addEventListener("click", () => {
-            renderSeatSelection(event);
+            renderSeatSelection(event); 
         });
     });
 }
@@ -96,7 +109,7 @@ function renderSeatSelection(event) {
                 </h3>
             </article>
 
-            <article class="sector" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <article id="sectors-container" class="sector" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
                 <table style="border-spacing: 5px;"><tbody></tbody></table>
                 <table style="border-spacing: 5px;"><tbody></tbody></table>
                 <table style="border-spacing: 5px;"><tbody></tbody></table>
@@ -137,71 +150,101 @@ function renderSeatSelection(event) {
 
         </div>
     `;
-    generateSeats();
+    generateSeats(event.id);
 }
-function generateSeats() {
-    const tables = document.querySelectorAll(".sector table tbody");
-    const selectedSeatsContainer = document.querySelector(".selectedSeats");
 
-    const rows = 10;
-    const cols = 3;
-    const rowLetters = "ABCDEFGHIJ";
 
-    let selectedSeats = [];
 
-    tables.forEach((tbody, sectorIndex) => {
-        tbody.innerHTML = "";
+function renderSelectedSeats(seats, container) {
+    container.innerHTML = "";
 
-        for (let i = 0; i < rows; i++) {
+    seats.forEach(id => {
+        const div = document.createElement("div");
+        div.textContent = id; // o podés mapear a nombre si querés
+        container.appendChild(div);
+    });
+}
+
+async function generateSeats(eventId) {
+    const container = document.getElementById("sectors-container");
+
+    if (!container) {
+        console.error("❌ No existe #sectors-container");
+        return;
+    }
+
+    container.innerHTML = "";
+    selectedSeats = []; // Reiniciamos la lista al cargar un nuevo evento
+
+    const sectors = await getSectors(eventId);
+
+    for (const sector of sectors) {
+        const sectorDiv = document.createElement("div");
+
+        sectorDiv.innerHTML = `
+            <h4>${sector.name}</h4>
+            <table>
+                <tbody></tbody>
+            </table>
+        `;
+
+        const tbody = sectorDiv.querySelector("tbody");
+        const seats = await getSeats(eventId, sector.id);
+        const seatsPerRow = 5;
+
+        for (let i = 0; i < seats.length; i += seatsPerRow) {
             const tr = document.createElement("tr");
+            const rowSeats = seats.slice(i, i + seatsPerRow);
 
-            for (let j = 0; j < cols; j++) {
+            rowSeats.forEach(seat => {
                 const td = document.createElement("td");
+                const seatDiv = document.createElement("div");
 
-                const seat = document.createElement("div");
-                const seatLabel = `${rowLetters[i]}${j + 1 + (sectorIndex * cols)}`;
+                seatDiv.dataset.id = seat.id;
+                seatDiv.textContent = seat.name || " ";
 
-                seat.textContent = seatLabel;
-                seat.style.width = "30px";
-                seat.style.height = "30px";
-                seat.style.background = "#444";
-                seat.style.borderRadius = "4px";
-                seat.style.display = "flex";
-                seat.style.alignItems = "center";
-                seat.style.justifyContent = "center";
-                seat.style.cursor = "pointer";
-                seat.style.fontSize = "12px";
+                seatDiv.style.width = "30px";
+                seatDiv.style.height = "30px";
+                seatDiv.style.background = "#444";
+                seatDiv.style.cursor = "pointer"; // Para que sepa que es clickeable
+                seatDiv.style.borderRadius = "4px";
 
-                // CLICK
-                seat.addEventListener("click", () => {
-                    if (seat.classList.contains("occupied")) return;
+                // --- AQUÍ LA LÓGICA DEL CLIC ---
+                seatDiv.addEventListener("click", () => {
+                    const seatId = seat.id;
 
-                    if (seat.classList.contains("selected")) {
-                        seat.classList.remove("selected");
-                        seat.style.background = "#444";
-                        selectedSeats = selectedSeats.filter(s => s !== seatLabel);
+                    if (selectedSeats.includes(seatId)) {
+                        // Si ya estaba, lo sacamos y volvemos al color gris
+                        selectedSeats = selectedSeats.filter(id => id !== seatId);
+                        seatDiv.style.background = "#444";
                     } else {
-                        seat.classList.add("selected");
-                        seat.style.background = "#a855f7";
-                        selectedSeats.push(seatLabel);
+                        // Si no estaba, lo sumamos y ponemos color púrpura
+                        selectedSeats.push(seatId);
+                        seatDiv.style.background = "#a855f7";
                     }
-
-                    renderSelectedSeats(selectedSeats, selectedSeatsContainer);
+                    console.log("IDs seleccionados:", selectedSeats);
                 });
+                // -------------------------------
 
-                // Simular algunos ocupados
-                if (Math.random() < 0.2) {
-                    seat.classList.add("occupied");
-                    seat.style.background = "#ff4444";
-                    seat.textContent = "X";
-                    seat.style.cursor = "not-allowed";
-                }
-
-                td.appendChild(seat);
+                td.appendChild(seatDiv);
                 tr.appendChild(td);
-            }
+            });
 
             tbody.appendChild(tr);
         }
-    });
+
+        container.appendChild(sectorDiv);
+    }
+
+    // Al final, configuramos el botón de confirmar que ya creaste en renderSeatSelection
+    const confirmBtn = document.getElementById("confirmBtn");
+    if (confirmBtn) {
+        confirmBtn.onclick = () => {
+            if (selectedSeats.length === 0) {
+                alert("Selecciona al menos un asiento");
+            } else {
+                alert("Asientos a comprar: " + selectedSeats.join(", "));
+            }
+        };
+    }
 }
