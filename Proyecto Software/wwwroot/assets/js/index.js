@@ -1,4 +1,5 @@
 ﻿let selectedSeats = []; 
+let purchaseTimer;
 
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("events-container");
@@ -93,6 +94,103 @@ function renderEvents(events, container) {
 function renderSeatSelection(event) {
     const main = document.getElementById("main-content");
 
+    selectedSeats = [];
+    if (purchaseTimer) clearInterval(purchaseTimer);
+
+    main.innerHTML = `
+        <div class="selection-container" style="padding: 20px; text-align: center; color: white;">
+            
+            <!-- Header con Navegación y Timer -->
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <button id="btnBack" style="background: #222; border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                
+                <div style="font-weight: bold; font-size: 1.1rem;">
+                    Entradas · <span id="timerDisplay">05:00</span>
+                </div>
+
+                <button id="btnClose" style="background: #222; border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </header>
+
+            <article>
+                <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">${event.name}</h1>
+                <p>${event.venue}</p>
+            </article>
+
+            <article>
+                <h3 style="background: #333; padding: 5px; margin: 0 auto 2rem auto; width: 60%; border-radius: 0 0 50px 50px;">
+                    Pantalla
+                </h3>
+            </article>
+
+            <article id="sectors-container" class="sector" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <!-- Aquí se cargan las tablas -->
+            </article>
+
+            <article class="statusBar" style="display: flex; justify-content: center; gap: 20px; margin-top: 2rem;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 20px; height: 20px; background: #444; border-radius: 4px;"></div>
+                    <span>Disponible</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 20px; height: 20px; background: #ff4444; border-radius: 4px;"></div>
+                    <span>No Disponible</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 20px; height: 20px; background: #a855f7; border-radius: 4px;"></div>
+                    <span>Seleccionado</span>
+                </div>
+            </article>
+
+            <div style="margin-top: 3rem; border-top: 1px solid #333; padding-top: 1.5rem; text-align: center;">
+                <button id="confirmBtn" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; border: none; padding: 12px 30px; font-size: 1rem; border-radius: 30px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 5px 15px rgba(168,85,247,0.4);">
+                    Confirmar compra
+                </button>
+            </div>
+        </div>
+    `;
+
+
+    startTimer(300); 
+    generateSeats(event.id);
+
+    const goBack = () => {
+        clearInterval(purchaseTimer);
+        selectedSeats = [];
+        location.reload(); 
+    };
+
+    document.getElementById("btnBack").onclick = goBack;
+    document.getElementById("btnClose").onclick = goBack;
+}
+function startTimer(duration) {
+    let timer = duration, minutes, seconds;
+    const display = document.getElementById("timerDisplay");
+
+    purchaseTimer = setInterval(() => {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            clearInterval(purchaseTimer);
+            alert("El tiempo de reserva ha expirado");
+            location.reload(); 
+        }
+    }, 1000);
+}
+
+/*
+function renderSeatSelection(event) {
+    const main = document.getElementById("main-content");
+
     main.innerHTML = `
         <div class="selection-container" style="padding: 20px; text-align: center; color: white;">
             
@@ -153,14 +251,14 @@ function renderSeatSelection(event) {
     generateSeats(event.id);
 }
 
-
+*/
 
 function renderSelectedSeats(seats, container) {
     container.innerHTML = "";
 
     seats.forEach(id => {
         const div = document.createElement("div");
-        div.textContent = id; // o podés mapear a nombre si querés
+        div.textContent = id; 
         container.appendChild(div);
     });
 }
@@ -174,7 +272,7 @@ async function generateSeats(eventId) {
     }
 
     container.innerHTML = "";
-    selectedSeats = []; // Reiniciamos la lista al cargar un nuevo evento
+    selectedSeats = []; 
 
     const sectors = await getSectors(eventId);
 
@@ -206,24 +304,30 @@ async function generateSeats(eventId) {
                 seatDiv.style.width = "30px";
                 seatDiv.style.height = "30px";
                 seatDiv.style.background = "#444";
-                seatDiv.style.cursor = "pointer"; // Para que sepa que es clickeable
+                seatDiv.style.cursor = "pointer"; 
                 seatDiv.style.borderRadius = "4px";
 
-                // --- AQUÍ LA LÓGICA DEL CLIC ---
-                seatDiv.addEventListener("click", () => {
-                    const seatId = seat.id;
+                if (seat.status === "Sold") {
+                    seatDiv.style.background = "#ff4444";
+                    seatDiv.style.cursor = "not-allowed";
+                } else {
 
-                    if (selectedSeats.includes(seatId)) {
-                        // Si ya estaba, lo sacamos y volvemos al color gris
-                        selectedSeats = selectedSeats.filter(id => id !== seatId);
-                        seatDiv.style.background = "#444";
-                    } else {
-                        // Si no estaba, lo sumamos y ponemos color púrpura
-                        selectedSeats.push(seatId);
-                        seatDiv.style.background = "#a855f7";
-                    }
-                    console.log("IDs seleccionados:", selectedSeats);
-                });
+                    seatDiv.style.background = "#444";
+                    seatDiv.style.cursor = "pointer";
+
+                    seatDiv.addEventListener("click", () => {
+                        const seatId = seat.id;
+
+                        if (selectedSeats.includes(seatId)) {
+                            selectedSeats = selectedSeats.filter(id => id !== seatId);
+                            seatDiv.style.background = "#444";
+                        } else {
+                            selectedSeats.push(seatId);
+                            seatDiv.style.background = "#a855f7"; 
+                        }
+                        console.log("IDs seleccionados:", selectedSeats);
+                    });
+                }
                 // -------------------------------
 
                 td.appendChild(seatDiv);
@@ -236,7 +340,7 @@ async function generateSeats(eventId) {
         container.appendChild(sectorDiv);
     }
 
-    // Al final, configuramos el botón de confirmar que ya creaste en renderSeatSelection
+
     const confirmBtn = document.getElementById("confirmBtn");
     if (confirmBtn) {
         confirmBtn.onclick = () => {
