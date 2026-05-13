@@ -1,6 +1,5 @@
 using Application.Interfaces;
 using Application.UseCases.Events.Handlers;
-using Domain.Entities;
 using Infraestructure.Persistence;
 using Infraestructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -21,9 +20,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
 //custom
+
+
 builder.Services.AddScoped<IGetAllEventsQueryHandler, GetAllEventsHandler>();
 builder.Services.AddScoped<IGetSectorsByEventQueryHandler, GetSectorsByEventHandler>();
 builder.Services.AddScoped<IGetSeatsStatusQueryHandler, GetSeatsStatusHandler>();
@@ -31,7 +30,12 @@ builder.Services.AddScoped<IReserveSeatCommandHandler, ReserveSeatHandler>();
 
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 
-builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("Infraestructure")
+    ));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",

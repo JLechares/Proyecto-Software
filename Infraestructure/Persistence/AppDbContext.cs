@@ -12,17 +12,7 @@ namespace Infraestructure.Persistence
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-        static string databaseName = "EventReservationDB.db";
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite($"Filename={databaseName}", options =>
-            {
-                options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
-            });
-
-            base.OnConfiguring(optionsBuilder);
-        }
+        
 
         public DbSet<Domain.Entities.USER> USERS { get; set; }
         public DbSet<Domain.Entities.RESERVATION> RESERVATIONS { get; set; }
@@ -33,6 +23,7 @@ namespace Infraestructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<EVENT>(entity =>
             {
                 entity.ToTable("EVENT");
@@ -42,18 +33,30 @@ namespace Infraestructure.Persistence
                 entity.HasMany(e => e.Sectors)
                       .WithOne(s => s.Event)
                       .HasForeignKey(s => s.EventId);
+                entity.HasData(new EVENT
+                {
+                    Id = 1,
+                    Name = "Final Universitaria de Software",
+                    EventDate = new DateTime(2026, 08, 15),
+                    Venue = "Auditorio UNAJ",
+                    Status = "Active"
+                });
             });
             modelBuilder.Entity<SECTOR>(entity =>
             {
                 entity.ToTable("SECTOR");
                 entity.HasKey(e => e.Id);
+                entity.Property(s => s.Price).HasPrecision(18, 2);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 // A Sector can have many Seats
                 entity.HasMany(s => s.Seats)
                       .WithOne(seat => seat.Sector)
                       .HasForeignKey(seat => seat.SectorId);
-
+                entity.HasData(
+                    new SECTOR { Id = 1, EventId = 1, Name = "VIP", Price = 25000.00m, Capacity = 50, Event=null!},
+                    new SECTOR { Id = 2, EventId = 1, Name = "Preferencial", Price = 12500.00m, Capacity = 50, Event=null! }
+                );
             });
             modelBuilder.Entity<SEAT>(entity =>
             {
@@ -62,6 +65,21 @@ namespace Infraestructure.Persistence
                 entity.Property(e => e.Id)
                       .ValueGeneratedOnAdd();
                 entity.Property(s => s.Version);
+                var seats = new List<SEAT>();
+                for (int i = 1; i <= 100; i++)
+                {
+                    var guidId = Guid.Parse($"00000000-0000-0000-0000-{i:D12}");
+                    seats.Add(new SEAT
+                    {
+                        Id = guidId,
+                        SectorId = i <= 50 ? 1 : 2,
+                        RowIdentifier = $"Fila {((i - 1) % 50) / 10 + 1}",
+                        SeatNumber = i,
+                        Status = "Available",
+                        Sector = null!
+                    });
+                }
+                entity.HasData(seats);
             });
             modelBuilder.Entity<RESERVATION>(entity =>
             {

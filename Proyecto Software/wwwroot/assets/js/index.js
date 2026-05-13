@@ -41,6 +41,7 @@ function renderEvents(events, container) {
         const date = new Date(event.date);
 
         const day = date.getDate();
+        console.log(date);
 
         const month = date.toLocaleString("es-AR", {
             month: "short"
@@ -84,10 +85,13 @@ function renderEvents(events, container) {
                 </div>
             </div>
         `;
+      
         container.appendChild(card);
         card.addEventListener("click", () => {
             renderSeatSelection(event); 
         });
+
+        
     });
 }
 
