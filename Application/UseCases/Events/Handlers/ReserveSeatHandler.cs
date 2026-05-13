@@ -4,7 +4,10 @@ using Application.UseCases.Events.Commands;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Text;
+using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases.Events.Handlers
 {
@@ -17,42 +20,86 @@ namespace Application.UseCases.Events.Handlers
         }
         public async Task<ReserveSeatResponse> HandleAsync(ReserveSeatCommand command)
         {
+            using var transaction = await _eventRepository.BeginTransactionAsync();
             var seat = await _eventRepository.GetSeatByIdAsync(command.SeatId);
-            if (seat == null) throw new Exception("Asiento no encontrado");
-            seat.Status = "Sold";
-            _eventRepository.UpdateSeat(seat);
-            await _eventRepository.SaveChangesAsync();
-
-            var reservation = new RESERVATION
+            string actionStatus = "SUCCESS";
+            try
             {
-                Id = Guid.NewGuid(),
-                SeatId = seat.Id,
-                UserId = command.UserId,
-                User = null,
-                Seat = seat,
-                Status = seat.Status,
-                ReservedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(5)
-            };
+               /* if (seat == null) throw new Exception("Asiento no encontrado");
+                if (seat != null && seat.Status != "Available")
+                    throw new Exception("El asiento no está disponible");
+               */
+                seat!.Status = "Reserved";
+                seat.Version++;
 
-            await _eventRepository.AddReservationAsync(reservation);
-            var auditLog = new AUDIT_LOG
-            {
-                Id = Guid.NewGuid(),
-                UserId = reservation.UserId,
-                Action = "RESERVE_SUCCESS",
-                EntityType = "Seat",
-                EntityId = seat.Id.ToString(),
-                Details = "Seat reserved successfully",
-                CreatedAt = DateTime.UtcNow
-            };
+                _eventRepository.UpdateSeat(seat);
+                /*
+                var reservation = new RESERVATION
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = command.UserId,
+                    User = null,
+                    Seat = seat,
+                    Status = seat.Status,
+                    ReservedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+                };
+                await _eventRepository.AddReservationAsync(reservation);
+                */
+                await _eventRepository.SaveChangesAsync();
 
-            await _eventRepository.AddAuditLogAsync(auditLog);
-            return new ReserveSeatResponse
+                await transaction.CommitAsync();
+                return new ReserveSeatResponse
+                {
+                    UserId = command.UserId,
+                    SeatId = command.SeatId
+                };
+            }
+            catch (DbUpdateConcurrencyException)
             {
-                UserId = reservation.UserId,
-                SeatId = reservation.SeatId
-            };
+                await transaction.RollbackAsync();
+                actionStatus = "RESERVE_ATTEMPT";
+                throw;
+            }
+            catch (Exception) {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            finally
+            {
+                /*var metadata = new
+                {
+                    EventId = seat?.Sector?.EventId,
+                    SectorId = seat?.SectorId,
+                    SeatId = command.SeatId,
+                    RequestTimestamp = DateTime.UtcNow
+                };
+                await _eventRepository.AddAuditLogAsync(new AUDIT_LOG
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = command.UserId,
+                    Action = actionStatus, // "SUCCESS", "CONFLICT_409", etc.
+                    EntityType = "Seat",
+                    EntityId = command.SeatId.ToString(),
+                    Details = System.Text.Json.JsonSerializer.Serialize(metadata), 
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _eventRepository.SaveChangesAsync();*/
+                /*var logManual = new AUDIT_LOG
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = command.UserId,
+                    Action = "TEST_MANUAL",
+                    EntityType = "Test",
+                    EntityId = "123",
+                    Details = "Si ves esto, el repo funciona",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _eventRepository.AddAuditLogAsync(logManual);
+                await _eventRepository.SaveChangesAsync();*/
+            }
+
         }
     }
 }

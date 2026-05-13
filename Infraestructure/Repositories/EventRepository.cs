@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Infraestructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,8 +16,14 @@ namespace Infraestructure.Repositories
         {
             _appDbContext = appDbContext;
         }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _appDbContext.Database.BeginTransactionAsync();
+        }
         public async Task AddAuditLogAsync(AUDIT_LOG log)
         {
+            _appDbContext.ChangeTracker.Clear();
             await _appDbContext.AUDIT_LOGS.AddAsync(log);
         }
 

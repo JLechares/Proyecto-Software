@@ -64,7 +64,7 @@ namespace Infraestructure.Persistence
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id)
                       .ValueGeneratedOnAdd();
-                entity.Property(s => s.Version);
+                entity.Property(s => s.Version).IsConcurrencyToken();
                 var seats = new List<SEAT>();
                 for (int i = 1; i <= 100; i++)
                 {

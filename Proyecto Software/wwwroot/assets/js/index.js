@@ -41,7 +41,6 @@ function renderEvents(events, container) {
         const date = new Date(event.date);
 
         const day = date.getDate();
-        console.log(date);
 
         const month = date.toLocaleString("es-AR", {
             month: "short"
@@ -141,11 +140,11 @@ function renderSeatSelection(event) {
                 </div>
                 <div style="display: flex; align-items: center; gap: 5px;">
                     <div style="width: 20px; height: 20px; background: #ff4444; border-radius: 4px;"></div>
-                    <span>No Disponible</span>
+                    <span>Vendido</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 5px;">
                     <div style="width: 20px; height: 20px; background: #a855f7; border-radius: 4px;"></div>
-                    <span>Seleccionado</span>
+                    <span>Reservado</span>
                 </div>
             </article>
 
@@ -191,71 +190,7 @@ function startTimer(duration) {
     }, 1000);
 }
 
-/*
-function renderSeatSelection(event) {
-    const main = document.getElementById("main-content");
 
-    main.innerHTML = `
-        <div class="selection-container" style="padding: 20px; text-align: center; color: white;">
-            
-            <article>
-                <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">
-                    ${event.name}
-                </h1>
-                <p>${event.venue}</p>
-            </article>
-
-            <article>
-                <h3 style="background: #333; padding: 5px; margin: 0 auto 2rem auto; width: 60%; border-radius: 0 0 50px 50px;">
-                    Pantalla
-                </h3>
-            </article>
-
-            <article id="sectors-container" class="sector" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                <table style="border-spacing: 5px;"><tbody></tbody></table>
-                <table style="border-spacing: 5px;"><tbody></tbody></table>
-                <table style="border-spacing: 5px;"><tbody></tbody></table>
-            </article>
-
-            <article class="statusBar" style="display: flex; justify-content: center; gap: 20px; margin-top: 2rem;">
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width: 20px; height: 20px; background: #444; border-radius: 4px;"></div>
-                    <span>Disponible</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width: 20px; height: 20px; background: #ff4444; border-radius: 4px;"></div>
-                    <span>No Disponible</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width: 20px; height: 20px; background: #a855f7; border-radius: 4px;"></div>
-                    <span>Seleccionado</span>
-                </div>
-            </article>
-
-            <div style="margin-top: 3rem; border-top: 1px solid #333; padding-top: 1.5rem; text-align: center;">
-    
-        <button id="confirmBtn" style="
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1rem;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 5px 15px rgba(168,85,247,0.4);
-        ">
-            Confirmar compra
-        </button>
-
-</div>
-
-        </div>
-    `;
-    generateSeats(event.id);
-}
-
-*/
 
 function renderSelectedSeats(seats, container) {
     container.innerHTML = "";
@@ -312,11 +247,16 @@ async function generateSeats(eventId) {
                 seatDiv.style.borderRadius = "4px";
 
                 if (seat.status === "Sold") {
-                    seatDiv.style.background = "#ff4444";
+                    seatDiv.style.background = "#ff4444"; 
                     seatDiv.style.cursor = "not-allowed";
-                } else {
 
-                    seatDiv.style.background = "#444";
+                } else if (seat.status === "Reserved") {
+
+                    seatDiv.style.background = "#a855f7"; 
+                    seatDiv.style.cursor = "not-allowed";
+
+                } else {
+                    seatDiv.style.background = "#444"; 
                     seatDiv.style.cursor = "pointer";
 
                     seatDiv.addEventListener("click", () => {
@@ -327,12 +267,11 @@ async function generateSeats(eventId) {
                             seatDiv.style.background = "#444";
                         } else {
                             selectedSeats.push(seatId);
-                            seatDiv.style.background = "#a855f7"; 
+                            seatDiv.style.background = "#22c55e"; 
                         }
-                        console.log("IDs seleccionados:", selectedSeats);
                     });
                 }
-                // -------------------------------
+
 
                 td.appendChild(seatDiv);
                 tr.appendChild(td);
@@ -354,10 +293,10 @@ async function generateSeats(eventId) {
                 return;
             }
 
-            // Usamos una variable para contar cuántas reservas salieron bien
+          
             let successCount = 0;
 
-            // Recorremos cada ID seleccionado para crear las reservaciones una por una
+           
             for (const id of selectedSeats) {
                 try {
                     const response = await fetch("/api/v1/reservations", {
@@ -365,7 +304,7 @@ async function generateSeats(eventId) {
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        // Estructura exacta de la foto: userId 0 y el seatId correspondiente
+                       
                         body: JSON.stringify({
                             userId: 0,
                             seatId: id
@@ -385,7 +324,7 @@ async function generateSeats(eventId) {
             // Feedback final al usuario
             if (successCount === selectedSeats.length) {
                 alert("¡Todas tus reservas se realizaron con éxito!");
-                // Aquí podrías limpiar el carrito y volver al inicio
+               
                 selectedSeats = [];
                 location.reload();
             } else {

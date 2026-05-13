@@ -74,6 +74,13 @@ namespace Proyecto_Software.Controllers
 
                 return StatusCode(201, result);
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(409, new
+                {
+                    message = "Lo sentimos, el asiento fue seleccionado por otro usuario hace instantes. Por favor, elegí otro."
+                });
+            }
             catch (Exception ex)
             {
                 return BadRequest(new
