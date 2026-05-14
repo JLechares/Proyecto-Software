@@ -59,8 +59,9 @@ namespace Proyecto_Software.Controllers
 
             return Ok(result);
         }
+
         [HttpPost("reserve-seat")]
-        public async Task<IActionResult> ReserveSeat(ReserveSeatResponse response)
+        public async Task<IActionResult> ReserveSeat([FromBody] ReserveSeatResponse response)
         {
             try
             {
@@ -73,6 +74,13 @@ namespace Proyecto_Software.Controllers
                 var result = await _reserveSeatHandler.HandleAsync(command);
 
                 return StatusCode(201, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new
+                {
+                    message = ex.Message
+                });
             }
             catch (Exception ex)
             {

@@ -17,6 +17,8 @@ namespace Domain.Entities
         public int SeatNumber { get; set; }
 
         public required string Status { get; set; }
+
+        [ConcurrencyCheck]
         public int Version { get; set; }
 
         public virtual ICollection<RESERVATION> Reservations { get; set; } = new List<RESERVATION>();

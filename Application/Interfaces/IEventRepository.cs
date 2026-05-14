@@ -16,5 +16,9 @@ namespace Application.Interfaces
         Task AddReservationAsync(RESERVATION reservation);
         Task AddAuditLogAsync(AUDIT_LOG log);
         Task <bool> SaveChangesAsync();
+        //Agregado "Fogis" :D 
+        Task<RESERVATION?> GetReservationByIdAsync(Guid reservationId);
+        void UpdateReservation(RESERVATION reservation);
+        Task<IEnumerable<RESERVATION>> GetExpiredPendingReservationsAsync(DateTime now);
     }
 }

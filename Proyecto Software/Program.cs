@@ -1,9 +1,11 @@
 using Application.Interfaces;
 using Application.UseCases.Events.Handlers;
+using Application.UseCases.Payments.Handlers;
 using Domain.Entities;
 using Infraestructure.Persistence;
 using Infraestructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Infraestructure.BackgroundJobs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +30,8 @@ builder.Services.AddScoped<IGetAllEventsQueryHandler, GetAllEventsHandler>();
 builder.Services.AddScoped<IGetSectorsByEventQueryHandler, GetSectorsByEventHandler>();
 builder.Services.AddScoped<IGetSeatsStatusQueryHandler, GetSeatsStatusHandler>();
 builder.Services.AddScoped<IReserveSeatCommandHandler, ReserveSeatHandler>();
+builder.Services.AddScoped<IProcessPaymentHandler, ProcessPaymentHandler>();
+builder.Services.AddHostedService<ExpiredReservationsBackgroundService>();
 
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 

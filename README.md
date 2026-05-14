@@ -1,7 +1,7 @@
 # 🎟️ Proyecto Software - Sistema de Gestión de Eventos
 
 Este proyecto es una API desarrollada en **.NET 8** para la gestión de eventos, sectores y reserva de asientos (butacas).  
-Permite consultar información de eventos, visualizar disponibilidad y realizar reservas.
+Permite consultar información de eventos, visualizar disponibilidad, realizar reservas temporales, procesar pagos, liberar reservas vencidas automáticamente y auditar acciones críticas del sistema.
 
 ---
 
@@ -31,6 +31,50 @@ Contiene el modelo del negocio:
 Contiene la implementación técnica:
 - Uso de AppDbContext para modelado de tablas y sus relaciones
 - EventRepository para la comunicacion de BD a los Commands, los Handlers y Queries
+- Entity Framework Core
+- SQLite
+- Background Services para procesamiento automático de reservas vencidas
+
+---
+
+## ⚡ Concurrencia
+
+El sistema implementa control de concurrencia optimista mediante el uso de un campo `Version` en los asientos.
+
+Esto evita que dos usuarios puedan reservar simultáneamente el mismo asiento.
+
+En caso de conflicto, la API devuelve:
+
+- HTTP 409 Conflict
+
+---
+
+## 🧾 Auditoría
+
+Todas las acciones críticas del sistema son registradas en la tabla `AUDIT_LOG`.
+
+Ejemplos:
+- RESERVE_SUCCESS
+- RESERVE_FAILED
+- PAYMENT_SUCCESS
+- RESERVATION_EXPIRED
+
+Cada registro almacena:
+- usuario;
+- acción;
+- entidad afectada;
+- timestamp exacto.
+
+---
+
+## ⏳ Background Jobs
+
+El sistema ejecuta tareas automáticas en segundo plano mediante `BackgroundService`.
+
+Actualmente se utiliza para:
+- detectar reservas vencidas;
+- liberar asientos automáticamente;
+- registrar auditoría.
 
 ---
 
@@ -74,10 +118,14 @@ Interfaz web que consume la API mediante JavaScript (fetch) para mostrar y manip
 
 ## 📌 Funcionalidades principales
 
-- Obtener eventos  
-- Consultar sectores por evento  
-- Visualizar estado de asientos  
-- Reservar asientos  
+- Obtener eventos
+- Consultar sectores por evento
+- Visualizar estado de asientos
+- Reservar asientos temporalmente
+- Procesar pagos
+- Liberación automática de reservas vencidas
+- Auditoría de acciones
+- Manejo de concurrencia
 
 ---
 
@@ -87,12 +135,25 @@ Interfaz web que consume la API mediante JavaScript (fetch) para mostrar y manip
 - ASP.NET Core  
 - Swagger  
 - Arquitectura Clean + CQRS  
+- Entity Framework Core
+- SQLite
 
 ---
 
 ## 📈 Estado del proyecto
 
-En desarrollo 🚧  
+Backend funcional 🚀
+
+Características implementadas:
+- API REST
+- Sistema de reservas
+- Procesamiento de pagos
+- Control de concurrencia
+- Auditoría
+- Expiración automática
+- Background workers
+
+Frontend en desarrollo 🚧
 
 ---
 

@@ -47,6 +47,26 @@ namespace Infraestructure.Repositories
             return await _appDbContext.SECTORS.Where(s => s.EventId == eventId).ToListAsync();
         }
 
+        public async Task<RESERVATION?> GetReservationByIdAsync(Guid reservationId)
+        {
+            return await _appDbContext.RESERVATIONS
+                .Include(r => r.Seat)
+                .FirstOrDefaultAsync(r => r.Id == reservationId);
+        }
+
+        public void UpdateReservation(RESERVATION reservation)
+        {
+            _appDbContext.RESERVATIONS.Update(reservation);
+        }
+
+        public async Task<IEnumerable<RESERVATION>> GetExpiredPendingReservationsAsync(DateTime now)
+        {
+            return await _appDbContext.RESERVATIONS
+                .Include(r => r.Seat)
+                .Where(r => r.Status == "Pending" && r.ExpiresAt <= now)
+                .ToListAsync();
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             return await _appDbContext.SaveChangesAsync() > 0;
