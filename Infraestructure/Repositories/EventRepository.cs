@@ -23,7 +23,7 @@ namespace Infraestructure.Repositories
         }
         public async Task AddAuditLogAsync(AUDIT_LOG log)
         {
-            _appDbContext.ChangeTracker.Clear();
+            //_appDbContext.ChangeTracker.Clear();
             await _appDbContext.AUDIT_LOGS.AddAsync(log);
         }
 
@@ -32,14 +32,24 @@ namespace Infraestructure.Repositories
             await _appDbContext.RESERVATIONS.AddAsync(reservation);
         }
 
-        public async Task<IEnumerable<EVENT>> GetAllEventsAsync()
+        public async Task<IEnumerable<EVENT>> GetAllEventsAsync(int pageNumber, int pageSize)
         {
-            return await _appDbContext.EVENTS.ToListAsync();
+            //Se usa sistema de paginación, para cuando sean muchos eventos, sea escalable
+            return await _appDbContext.EVENTS
+                        .OrderBy(e => e.EventDate)
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
         }
 
         public async Task<SEAT?> GetSeatByIdAsync(Guid seatId)
         {
             return await _appDbContext.SEATS.FirstOrDefaultAsync(s => s.Id == seatId);
+        }
+
+        public async Task<RESERVATION?> GetReservationAsync(Guid reservationId)
+        {
+            return await _appDbContext.RESERVATIONS.FirstOrDefaultAsync(r => r.Id == reservationId);
         }
 
         public async Task<IEnumerable<SEAT>> GetSeatsByEventAndSectorAsync(int eventId, int sectorId)
@@ -63,6 +73,13 @@ namespace Infraestructure.Repositories
         public void UpdateSeat(SEAT seat)
         {
             _appDbContext.SEATS.Update(seat);
+            
+        }
+
+        public void UpdateReservation(RESERVATION reservation)
+        {
+            _appDbContext.RESERVATIONS.Update(reservation);
+            
         }
     }
 }

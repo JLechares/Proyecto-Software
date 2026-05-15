@@ -2,7 +2,9 @@
 using Application.Interfaces;   
 using Application.UseCases.Events.Commands;
 using Application.UseCases.Events.Queries;
+using Domain.Entities;
 using Infraestructure.Persistence;
+using Infraestructure.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +20,7 @@ namespace Proyecto_Software.Controllers
         private readonly IGetSectorsByEventQueryHandler _getSectorsByEventHandler;
         private readonly IReserveSeatCommandHandler _reserveSeatHandler;
 
+
         public EventsController(
             IGetAllEventsQueryHandler getAllEventsHandler,
             IGetSeatsStatusQueryHandler getSeatsStatusHandler,
@@ -28,12 +31,12 @@ namespace Proyecto_Software.Controllers
             _getSeatsStatusHandler = getSeatsStatusHandler;
             _getSectorsByEventHandler = getSectorsByEventHandler;
             _reserveSeatHandler = reserveSeatHandler;
+
         }
 
         [HttpGet("v1/events")]
-        public async Task<IActionResult> GetAllEvents()
+        public async Task<IActionResult> GetAllEvents([FromQuery] GetAllEventsQuery query)
         {
-            var query = new GetAllEventsQuery();
             var events = await _getAllEventsHandler.HandleAsync(query);
             return Ok(events);
         }
@@ -67,7 +70,7 @@ namespace Proyecto_Software.Controllers
                 var command = new ReserveSeatCommand
                 {
                     SeatId = response.SeatId,
-                    UserId = response.UserId
+                    UserId = response.UserId,
                 };
 
                 var result = await _reserveSeatHandler.HandleAsync(command);

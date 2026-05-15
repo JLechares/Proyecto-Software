@@ -25,27 +25,27 @@ namespace Application.UseCases.Events.Handlers
             string actionStatus = "SUCCESS";
             try
             {
-               /* if (seat == null) throw new Exception("Asiento no encontrado");
+                if (seat == null) throw new Exception("Asiento no encontrado");
                 if (seat != null && seat.Status != "Available")
                     throw new Exception("El asiento no está disponible");
-               */
+               
                 seat!.Status = "Reserved";
                 seat.Version++;
 
                 _eventRepository.UpdateSeat(seat);
-                /*
+                
                 var reservation = new RESERVATION
                 {
                     Id = Guid.NewGuid(),
                     UserId = command.UserId,
                     User = null,
                     Seat = seat,
-                    Status = seat.Status,
+                    Status = "Pending",
                     ReservedAt = DateTime.UtcNow,
                     ExpiresAt = DateTime.UtcNow.AddMinutes(5)
                 };
                 await _eventRepository.AddReservationAsync(reservation);
-                */
+                
                 await _eventRepository.SaveChangesAsync();
 
                 await transaction.CommitAsync();
@@ -67,7 +67,7 @@ namespace Application.UseCases.Events.Handlers
             }
             finally
             {
-                /*var metadata = new
+                var metadata = new
                 {
                     EventId = seat?.Sector?.EventId,
                     SectorId = seat?.SectorId,
@@ -78,26 +78,13 @@ namespace Application.UseCases.Events.Handlers
                 {
                     Id = Guid.NewGuid(),
                     UserId = command.UserId,
-                    Action = actionStatus, // "SUCCESS", "CONFLICT_409", etc.
+                    Action = actionStatus,
                     EntityType = "Seat",
                     EntityId = command.SeatId.ToString(),
                     Details = System.Text.Json.JsonSerializer.Serialize(metadata), 
                     CreatedAt = DateTime.UtcNow
                 });
-                await _eventRepository.SaveChangesAsync();*/
-                /*var logManual = new AUDIT_LOG
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = command.UserId,
-                    Action = "TEST_MANUAL",
-                    EntityType = "Test",
-                    EntityId = "123",
-                    Details = "Si ves esto, el repo funciona",
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _eventRepository.AddAuditLogAsync(logManual);
-                await _eventRepository.SaveChangesAsync();*/
+                await _eventRepository.SaveChangesAsync();
             }
 
         }

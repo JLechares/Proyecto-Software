@@ -17,7 +17,7 @@ namespace Application.UseCases.Events.Handlers
         }
         public async Task<IEnumerable<EventResponse>> HandleAsync(GetAllEventsQuery query)
         {
-            var events = await _eventRepository.GetAllEventsAsync();
+            var events = await _eventRepository.GetAllEventsAsync(query.Page, query.PageSize);
             return events.Select(e => new EventResponse
             {
                 Id = e.Id,

@@ -306,7 +306,7 @@ async function generateSeats(eventId) {
                         },
                        
                         body: JSON.stringify({
-                            userId: 0,
+                            userId: 2,
                             seatId: id
                         })
                     });
@@ -321,7 +321,6 @@ async function generateSeats(eventId) {
                 }
             }
 
-            // Feedback final al usuario
             if (successCount === selectedSeats.length) {
                 alert("¡Todas tus reservas se realizaron con éxito!");
                

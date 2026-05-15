@@ -1,8 +1,10 @@
 using Application.Interfaces;
 using Application.UseCases.Events.Handlers;
+using Application.UseCases.Payments.Handlers;
 using Infraestructure.Persistence;
 using Infraestructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +17,6 @@ builder.Services.AddControllers().AddJsonOptions(options =>
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -27,6 +28,7 @@ builder.Services.AddScoped<IGetAllEventsQueryHandler, GetAllEventsHandler>();
 builder.Services.AddScoped<IGetSectorsByEventQueryHandler, GetSectorsByEventHandler>();
 builder.Services.AddScoped<IGetSeatsStatusQueryHandler, GetSeatsStatusHandler>();
 builder.Services.AddScoped<IReserveSeatCommandHandler, ReserveSeatHandler>();
+builder.Services.AddScoped<IProcessPaymentHandler, ProcessPaymentHandler>();
 
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 
