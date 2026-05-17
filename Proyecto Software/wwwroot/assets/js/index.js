@@ -160,7 +160,7 @@ function setupConfirmButton() {
                 const response = await createReservation(id);
 
                 if (response.status === 409) {
-                    showToast(`La Butaca ${id.toString().substring(0, 3)} ya fue reservada por otro usuario.`, "error");
+                    showToast(`La Butaca ${id.toString().substring(33, 36)} ya fue reservada por otro usuario.`, "error");
                     selectedSeats = selectedSeats.filter(seatId => seatId !== id);
                     await generateSeats(currentEvent.id);
                     continue;
@@ -188,7 +188,7 @@ function setupConfirmButton() {
 
                     if (resId) {
                         newReservations.push(resId);
-                        seatNamesReserved.push(`Butaca ${id.toString().substring(0, 3)}`);
+                        seatNamesReserved.push(`Butaca ${id.toString().substring(33,37)}`);
                     }
                     alreadyReservedInBackend.push(id);
                 }
