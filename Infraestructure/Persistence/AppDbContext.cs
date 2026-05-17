@@ -36,9 +36,9 @@ namespace Infraestructure.Persistence
                 entity.HasData(new EVENT
                 {
                     Id = 1,
-                    Name = "Final Universitaria de Software",
+                    Name = "Maria Becerra Concierto",
                     EventDate = new DateTime(2026, 08, 15),
-                    Venue = "Auditorio UNAJ",
+                    Venue = "River Plate stadium",
                     Status = "Active"
                 });
             });
@@ -106,6 +106,22 @@ namespace Infraestructure.Persistence
                 entity.HasMany(u => u.Reservations)
                       .WithOne(r => r.User)
                       .HasForeignKey(r => r.UserId);
+                entity.HasData(
+                    new USER
+                    {
+                        Id = 1,
+                        Name = "Juan",
+                        Email = "Juanlechares@gmail.com",
+                        PasswordHash = "1232132"
+                    },
+                    new USER
+                    {
+                        Id = 2,
+                        Name = "Juan Cruz",
+                        Email = "Juanmerino@gmail.com",
+                        PasswordHash = "5555555"
+                    }
+                );
 
             });
             modelBuilder.Entity<AUDIT_LOG>(entity =>
