@@ -36,10 +36,33 @@ Contiene la implementación técnica:
 
 ## 🚀 Ejecución del proyecto
 
-1. Abrir la solución en Visual Studio  
-2. Ejecutar el proyecto (F5 o botón "Run")  
-3. Acceder a las siguientes URLs  
+## 🛠️ Configuración y Precarga de la Base de Datos (SQL Server)
 
+El proyecto utiliza **SQL Server LocalDB** para el entorno de desarrollo y cuenta con un sistema de **Data Seeding** automático. Al aplicar las migraciones, la base de datos se creará y se rellenará automáticamente con los datos iniciales de prueba para el sistema de reservas.
+
+### Datos Precargados Automáticamente:
+* **Evento:** Concierto de María Becerra en el Estadio River Plate (Programado para el 15/08/2026).
+* **Sectores:** * `VIP` (Id: 1, Precio: $25.000, Capacidad: 50 butacas).
+  * `Preferencial` (Id: 2, Precio: $12.500, Capacidad: 50 butacas).
+* **Butacas:** Se generan automáticamente las 100 butacas del estadio, mapeadas con GUIDs secuenciales fijos, distribuidas equitativamente en filas de 10 asientos por sector y configuradas inicialmente como `Available` (Disponibles).
+* **Usuarios:** Dos usuarios precargados, que son los integrantes del proyecto
+ ---
+
+### 🚀 Pasos para levantar la Base de Datos en tu máquina
+
+Para clonar el proyecto y tener todo funcionando con datos de prueba de entrada, seguí estos pasos:
+
+1. **Requisito previo:** Asegurate de tener instalado **SQL Server LocalDB** (se instala de forma predeterminada al cargar el entorno de desarrollo de .NET / Visual Studio).
+2. **Verificar Cadena de Conexión:** El archivo `appsettings.json` de la WebAPI ya viene configurado de forma estándar para apuntar a la instancia local común:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=EventReservationDB;Trusted_Connection=True;MultipleActiveResultSets=true"
+   }
+3. Ejecutar la Migración y el Seeding: Abre una terminal en la raíz del proyecto (donde se encuentra el archivo de contexto AppDbContext.cs) y ejecuta el comando de Entity Framework:
+
+ ```Bash
+dotnet ef database update
+ ```
 ---
 
 ## 🌐 Accesos
@@ -83,7 +106,7 @@ Interfaz web que consume la API mediante JavaScript (fetch) para mostrar y manip
 
 ## 🛠️ Tecnologías utilizadas
 
-- .NET 8  
+- .NET 10 
 - ASP.NET Core  
 - Swagger  
 - Arquitectura Clean + CQRS  
