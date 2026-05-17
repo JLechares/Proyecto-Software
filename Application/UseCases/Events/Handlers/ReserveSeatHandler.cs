@@ -29,8 +29,11 @@ namespace Application.UseCases.Events.Handlers
                 if (seat == null) throw new Exception("Asiento no encontrado");
                 var sector = await _eventRepository.GetSectorByIdAsync(seat!.SectorId);
                 if (seat != null && seat.Status != "Available")
-                    throw new Exception("El asiento no está disponible");
-               
+                {
+                    actionStatus = "CONFLICT_OCCUPIED"; // Cambiamos el estado para el log
+                    throw new InvalidOperationException("El asiento no está disponible");
+                }
+
                 seat!.Status = "Reserved";
                 seat.Version++;
 
@@ -53,6 +56,7 @@ namespace Application.UseCases.Events.Handlers
                 await transaction.CommitAsync();
                 return new ReserveSeatResponse
                 {
+                    ReservationId=reservation.Id,
                     UserId = command.UserId,
                     SeatId = command.SeatId
                 };

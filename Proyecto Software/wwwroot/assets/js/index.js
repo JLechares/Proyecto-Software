@@ -1,19 +1,16 @@
-﻿let selectedSeats = []; 
-let purchaseTimer;
+﻿import { getEvents, getSectors, getSeats, createReservation, processPayment } from "./api.js";
+import { createEventCard, injectSeatSelectionTemplate, injectModalTemplate, showToast, getOrCreateCartContainer, createCartItemElement } from "./ui.js";
+import { startTimer, stopTimer } from "./timer.js";
+
+let selectedSeats = [];
+let currentEvent = null;
+let lastReservationId = null;
+let alreadyReservedInBackend = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("events-container");
-
     try {
-        const response = await fetch("/api/v1/events");
-       
-
-        if (!response.ok) {
-            throw new Error("Error al obtener eventos");
-        }
-
-        const events = await response.json();
-
+        const events = await getEvents();
         renderEvents(events, container);
     } catch (error) {
         console.error(error);
@@ -21,211 +18,62 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-async function getSectors(eventId) {
-    const response = await fetch(`/api/v1/${eventId}/sectors`);
-    return await response.json();
-}
-
-async function getSeats(eventId, sectorId) {
-    const response = await fetch(`/api/v1/${eventId}/sectors/${sectorId}/seats`);
-    return await response.json();
-}
-
 function renderEvents(events, container) {
     container.innerHTML = "";
-
     events.forEach(event => {
-        const card = document.createElement("div");
-        card.className = "card event-card";
-
-        const date = new Date(event.date);
-
-        const day = date.getDate();
-
-        const month = date.toLocaleString("es-AR", {
-            month: "short"
-        }).replace(".", "");
-
-        card.innerHTML = `
-            <div class="card-img-container">
-                <img src="./assets/img/headerBackground.png" class="card-img-top" alt="${event.name}">
-
-                <div class="date-badge">
-                    <div class="date-day">${day}</div>
-                    <div class="date-month">${month}</div>
-                </div>
-
-                <div class="check-badge">
-                    <i class="bi bi-check-lg"></i>
-                </div>
-            </div>
-
-            <div class="card-body card-header-body">
-                <h5 class="card-title event-title">${event.name}</h5>
-                <h6 class="card-subtitle event-subtitle">${event.description ?? ""}</h6>
-            </div>
-
-            <div class="card-body card-details-body">
-                <div class="detail-item">
-                    <i class="bi bi-geo-alt detail-icon"></i>
-                    <span class="detail-text">${event.venue}</span>
-                </div>
-                <div class="detail-item">
-                    <i class="bi bi-calendar-event detail-icon"></i>
-                    <span class="detail-text">${date.toLocaleDateString()}</span>
-                </div>
-                <div class="detail-item">
-                    <i class="bi bi-clock detail-icon"></i>
-                    <span class="detail-text">${date.toLocaleTimeString()}</span>
-                </div>
-
-                <div class="category-tag">
-                    ${event.category ?? "Evento"}
-                </div>
-            </div>
-        `;
-      
+        const card = createEventCard(event);
+        card.addEventListener("click", () => renderSeatSelection(event));
         container.appendChild(card);
-        card.addEventListener("click", () => {
-            renderSeatSelection(event); 
-        });
-
-        
     });
 }
 
 function renderSeatSelection(event) {
     const main = document.getElementById("main-content");
-
     selectedSeats = [];
-    if (purchaseTimer) clearInterval(purchaseTimer);
+    alreadyReservedInBackend = [];
+    lastReservationId = null;
+    currentEvent = event;
+    stopTimer();
 
-    main.innerHTML = `
-        <div class="selection-container" style="padding: 20px; text-align: center; color: white;">
-            
-            <!-- Header con Navegación y Timer -->
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <button id="btnBack" style="background: #222; border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
-                    <i class="bi bi-arrow-left"></i>
-                </button>
-                
-                <div style="font-weight: bold; font-size: 1.1rem;">
-                    Entradas · <span id="timerDisplay">05:00</span>
-                </div>
+  
+    injectSeatSelectionTemplate(main, event);
 
-                <button id="btnClose" style="background: #222; border: none; color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </header>
+    injectModalTemplate(main);
 
-            <article>
-                <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">${event.name}</h1>
-                <p>${event.venue}</p>
-            </article>
-
-            <article>
-                <h3 style="background: #333; padding: 5px; margin: 0 auto 2rem auto; width: 60%; border-radius: 0 0 50px 50px;">
-                    Pantalla
-                </h3>
-            </article>
-
-            <article id="sectors-container" class="sector" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                <!-- Aquí se cargan las tablas -->
-            </article>
-
-            <article class="statusBar" style="display: flex; justify-content: center; gap: 20px; margin-top: 2rem;">
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width: 20px; height: 20px; background: #444; border-radius: 4px;"></div>
-                    <span>Disponible</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width: 20px; height: 20px; background: #ff4444; border-radius: 4px;"></div>
-                    <span>Vendido</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width: 20px; height: 20px; background: #a855f7; border-radius: 4px;"></div>
-                    <span>Reservado</span>
-                </div>
-            </article>
-
-            <div style="margin-top: 3rem; border-top: 1px solid #333; padding-top: 1.5rem; text-align: center;">
-                <button id="confirmBtn" style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; border: none; padding: 12px 30px; font-size: 1rem; border-radius: 30px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 5px 15px rgba(168,85,247,0.4);">
-                    Confirmar compra
-                </button>
-            </div>
-        </div>
-    `;
-
-
-    startTimer(300); 
     generateSeats(event.id);
 
+    setTimeout(() => {
+        setupConfirmButton();
+    }, 50);
+
     const goBack = () => {
-        clearInterval(purchaseTimer);
+        stopTimer();
         selectedSeats = [];
-        location.reload(); 
+        currentEvent = null;
+        location.reload();
     };
 
     document.getElementById("btnBack").onclick = goBack;
     document.getElementById("btnClose").onclick = goBack;
 }
-function startTimer(duration) {
-    let timer = duration, minutes, seconds;
-    const display = document.getElementById("timerDisplay");
-
-    purchaseTimer = setInterval(() => {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-
-        display.textContent = minutes + ":" + seconds;
-
-        if (--timer < 0) {
-            clearInterval(purchaseTimer);
-            alert("El tiempo de reserva ha expirado");
-            location.reload(); 
-        }
-    }, 1000);
-}
-
-
-
-function renderSelectedSeats(seats, container) {
-    container.innerHTML = "";
-
-    seats.forEach(id => {
-        const div = document.createElement("div");
-        div.textContent = id; 
-        container.appendChild(div);
-    });
-}
 
 async function generateSeats(eventId) {
     const container = document.getElementById("sectors-container");
+    if (!container) return;
 
-    if (!container) {
-        console.error("❌ No existe #sectors-container");
+    container.innerHTML = "";
+    const sectors = await getSectors(eventId);
+
+    if (!sectors || !Array.isArray(sectors)) {
+        console.error("No se pudieron cargar los sectores válidos.");
         return;
     }
 
-    container.innerHTML = "";
-    selectedSeats = []; 
-
-    const sectors = await getSectors(eventId);
-
     for (const sector of sectors) {
         const sectorDiv = document.createElement("div");
-
-        sectorDiv.innerHTML = `
-            <h4>${sector.name}</h4>
-            <table>
-                <tbody></tbody>
-            </table>
-        `;
-
+        sectorDiv.innerHTML = `<h4>${sector.name}</h4><table><tbody></tbody></table>`;
         const tbody = sectorDiv.querySelector("tbody");
+
         const seats = await getSeats(eventId, sector.id);
         const seatsPerRow = 5;
 
@@ -240,95 +88,198 @@ async function generateSeats(eventId) {
                 seatDiv.dataset.id = seat.id;
                 seatDiv.textContent = seat.name || " ";
 
+                // Estilos fijos
                 seatDiv.style.width = "30px";
                 seatDiv.style.height = "30px";
-                seatDiv.style.background = "#444";
-                seatDiv.style.cursor = "pointer"; 
                 seatDiv.style.borderRadius = "4px";
+                seatDiv.style.display = "flex";
+                seatDiv.style.justifyContent = "center";
+                seatDiv.style.alignItems = "center";
+                seatDiv.style.fontSize = "11px";
+                seatDiv.style.color = "white";
+
+                const isMineInCart = selectedSeats.includes(seat.id);
 
                 if (seat.status === "Sold") {
-                    seatDiv.style.background = "#ff4444"; 
+                    seatDiv.style.background = "#ff4444";
                     seatDiv.style.cursor = "not-allowed";
-
-                } else if (seat.status === "Reserved") {
-
-                    seatDiv.style.background = "#a855f7"; 
-                    seatDiv.style.cursor = "not-allowed";
-
-                } else {
-                    seatDiv.style.background = "#444"; 
-                    seatDiv.style.cursor = "pointer";
-
-                    seatDiv.addEventListener("click", () => {
-                        const seatId = seat.id;
-
-                        if (selectedSeats.includes(seatId)) {
-                            selectedSeats = selectedSeats.filter(id => id !== seatId);
-                            seatDiv.style.background = "#444";
-                        } else {
-                            selectedSeats.push(seatId);
-                            seatDiv.style.background = "#22c55e"; 
-                        }
-                    });
                 }
+                else if (seat.status === "Reserved" && !isMineInCart) {
+                    seatDiv.style.background = "#a855f7";
+                    seatDiv.style.cursor = "not-allowed";
+                }
+                else {
+                    if (isMineInCart) {
+                        seatDiv.style.background = "#22c55e";
+                        seatDiv.style.cursor = "not-allowed";
+                    } else {
+                        seatDiv.style.background = "#444";
+                        seatDiv.style.cursor = "pointer";
 
+                        seatDiv.addEventListener("click", () => {
+                            if (!selectedSeats.includes(seat.id)) {
+                                selectedSeats.push(seat.id);
+                                seatDiv.style.background = "#22c55e";
+                                lastReservationId = null;
+                            }
+                        });
+                    }
+                }
 
                 td.appendChild(seatDiv);
                 tr.appendChild(td);
             });
-
             tbody.appendChild(tr);
         }
-
         container.appendChild(sectorDiv);
     }
+}
 
-
+function setupConfirmButton() {
     const confirmBtn = document.getElementById("confirmBtn");
-
-    if (confirmBtn) {
-        confirmBtn.onclick = async () => {
-            if (selectedSeats.length === 0) {
-                alert("Selecciona al menos un asiento");
-                return;
-            }
-
-          
-            let successCount = 0;
-
-           
-            for (const id of selectedSeats) {
-                try {
-                    const response = await fetch("/api/v1/reservations", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                       
-                        body: JSON.stringify({
-                            userId: 2,
-                            seatId: id
-                        })
-                    });
-
-                    if (response.ok) {
-                        successCount++;
-                    } else {
-                        console.error(`Fallo al reservar el asiento: ${id}`);
-                    }
-                } catch (error) {
-                    console.error("Error de red:", error);
-                }
-            }
-
-            if (successCount === selectedSeats.length) {
-                alert("¡Todas tus reservas se realizaron con éxito!");
-               
-                selectedSeats = [];
-                location.reload();
-            } else {
-                alert(`Se reservaron ${successCount} de ${selectedSeats.length} asientos. Revisa la consola.`);
-            }
-        };
+    if (!confirmBtn) {
+        console.error("No se encontró el botón confirmBtn en el DOM todavía.");
+        return;
     }
+
+    confirmBtn.onclick = async () => {
+        if (selectedSeats.length === 0) {
+            showToast("Por favor, selecciona al menos un asiento para continuar.", "error");
+            return;
+        }
+
+        let newReservations = [];
+        let seatNamesReserved = [];
+
+        for (const id of selectedSeats) {
+            if (alreadyReservedInBackend.includes(id)) {
+                continue;
+            }
+
+            try {
+                const response = await createReservation(id);
+
+                if (response.status === 409) {
+                    showToast(`La Butaca ${id.toString().substring(0, 3)} ya fue reservada por otro usuario.`, "error");
+                    selectedSeats = selectedSeats.filter(seatId => seatId !== id);
+                    await generateSeats(currentEvent.id);
+                    continue;
+                }
+
+                if (response.status === 400) {
+
+                    let errorMsg = "Solicitud inválida o asiento no disponible.";
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.message || errorData.title || errorMsg;
+                    } catch (e) {
+                    }
+
+                    showToast(`Error: ${errorMsg}`, "error");
+
+                    selectedSeats = selectedSeats.filter(seatId => seatId !== id);
+                    await generateSeats(currentEvent.id);
+                    continue; 
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const resId = data.reservationId || data.id;
+
+                    if (resId) {
+                        newReservations.push(resId);
+                        seatNamesReserved.push(`Butaca ${id.toString().substring(0, 3)}`);
+                    }
+                    alreadyReservedInBackend.push(id);
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+            }
+        }
+
+        if (newReservations.length > 0) {
+            const groupReservationId = newReservations[0];
+
+            const cartContainer = getOrCreateCartContainer();
+            const cartItem = createCartItemElement(groupReservationId, seatNamesReserved, "05:00");
+            cartContainer.appendChild(cartItem);
+
+            selectedSeats = [];
+            await generateSeats(currentEvent.id);
+            showToast("Asientos reservados y añadidos al Carrito Flotante.", "success");
+
+            let timeLeft = 300;
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+
+                const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                const seconds = (timeLeft % 60).toString().padStart(2, '0');
+                const timeString = `${minutes}:${seconds}`;
+
+                const timerDisplay = document.getElementById(`cart-timer-${groupReservationId}`);
+                if (timerDisplay) {
+                    timerDisplay.textContent = `⏱️ ${timeString}`;
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    cartItem.remove();
+                    showToast("El tiempo de una de tus reservas expiró y los asientos se liberaron.", "error");
+
+                    alreadyReservedInBackend = alreadyReservedInBackend.filter(id => !newReservations.includes(id));
+                    generateSeats(currentEvent.id);
+                }
+            }, 1000);
+
+            const payCartBtn = cartItem.querySelector(`#btn-pay-cart-${groupReservationId}`);
+
+            if (payCartBtn) {
+                payCartBtn.onclick = () => {
+                    const modal = document.getElementById("paymentModal");
+                    if (modal) modal.style.display = "flex";
+
+                    document.getElementById("btnExecutePayment").onclick = async () => {
+                        try {
+                            document.getElementById("btnExecutePayment").disabled = true;
+                            let allOk = true;
+
+                            for (const resId of newReservations) {
+                                const paymentResponse = await processPayment(resId);
+                                if (!paymentResponse.ok) {
+                                    allOk = false;
+                                    console.error(`Error pagando la reserva: ${resId}`);
+                                }
+                            }
+
+                            if (allOk) {
+                                clearInterval(timerInterval); 
+                                cartItem.remove(); 
+
+                                if (modal) modal.style.display = "none";
+                                showToast("¡Pago procesado con éxito! Tu reserva está firme.", "success");
+
+
+                                alreadyReservedInBackend = alreadyReservedInBackend.filter(id => !newReservations.includes(id));
+
+                                await generateSeats(currentEvent.id);
+                            } else {
+                                showToast("Hubo un error al procesar el pago de esta reserva.", "error");
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        } finally {
+                            document.getElementById("btnExecutePayment").disabled = false;
+                        }
+                    };
+
+                    document.getElementById("btnCancelPayment").onclick = () => {
+                        if (modal) modal.style.display = "none";
+                        showToast("Pago pausado. Tu carrito sigue guardado en la esquina.", "info");
+                    };
+                };
+            } else {
+                console.error("No se pudo encontrar el botón de pago dentro del elemento del carrito.");
+            }
+        }
+    };
 }
