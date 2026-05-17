@@ -46,7 +46,10 @@ namespace Infraestructure.Repositories
         {
             return await _appDbContext.SEATS.FirstOrDefaultAsync(s => s.Id == seatId);
         }
-
+        public async Task<SECTOR?> GetSectorByIdAsync(int sectorId)
+        {
+            return await _appDbContext.SECTORS.FirstOrDefaultAsync(s => s.Id == sectorId);
+        }
         public async Task<RESERVATION?> GetReservationAsync(Guid reservationId)
         {
             return await _appDbContext.RESERVATIONS.FirstOrDefaultAsync(r => r.Id == reservationId);
@@ -63,6 +66,14 @@ namespace Infraestructure.Repositories
         public async Task<IEnumerable<SECTOR>> GetSectorsByEventAsync(int eventId)
         {
             return await _appDbContext.SECTORS.Where(s => s.EventId == eventId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<RESERVATION>> GetExpiredPendingReservationsAsync(DateTime now)
+        {
+            return await _appDbContext.RESERVATIONS
+                .Include(r => r.Seat)
+                .Where(r => r.Status == "Pending" && r.ExpiresAt <= now)
+                .ToListAsync();
         }
 
         public async Task<bool> SaveChangesAsync()

@@ -22,10 +22,12 @@ namespace Application.UseCases.Events.Handlers
         {
             using var transaction = await _eventRepository.BeginTransactionAsync();
             var seat = await _eventRepository.GetSeatByIdAsync(command.SeatId);
+            
             string actionStatus = "SUCCESS";
             try
             {
                 if (seat == null) throw new Exception("Asiento no encontrado");
+                var sector = await _eventRepository.GetSectorByIdAsync(seat!.SectorId);
                 if (seat != null && seat.Status != "Available")
                     throw new Exception("El asiento no está disponible");
                
@@ -41,8 +43,8 @@ namespace Application.UseCases.Events.Handlers
                     User = null,
                     Seat = seat,
                     Status = "Pending",
-                    ReservedAt = DateTime.UtcNow,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+                    ReservedAt = DateTime.Now,
+                    ExpiresAt = DateTime.Now.AddMinutes(1)
                 };
                 await _eventRepository.AddReservationAsync(reservation);
                 
@@ -69,10 +71,10 @@ namespace Application.UseCases.Events.Handlers
             {
                 var metadata = new
                 {
-                    EventId = seat?.Sector?.EventId,
+                    EventId = (await _eventRepository.GetSectorByIdAsync(seat!.SectorId))?.EventId,
                     SectorId = seat?.SectorId,
                     SeatId = command.SeatId,
-                    RequestTimestamp = DateTime.UtcNow
+                    RequestTimestamp = DateTime.Now
                 };
                 await _eventRepository.AddAuditLogAsync(new AUDIT_LOG
                 {
@@ -82,7 +84,7 @@ namespace Application.UseCases.Events.Handlers
                     EntityType = "Seat",
                     EntityId = command.SeatId.ToString(),
                     Details = System.Text.Json.JsonSerializer.Serialize(metadata), 
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 });
                 await _eventRepository.SaveChangesAsync();
             }

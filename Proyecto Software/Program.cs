@@ -4,6 +4,7 @@ using Application.UseCases.Payments.Handlers;
 using Infraestructure.Persistence;
 using Infraestructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Infraestructure.BackgroundJobs;
 using System.Diagnostics;
 
 
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IGetSectorsByEventQueryHandler, GetSectorsByEventHand
 builder.Services.AddScoped<IGetSeatsStatusQueryHandler, GetSeatsStatusHandler>();
 builder.Services.AddScoped<IReserveSeatCommandHandler, ReserveSeatHandler>();
 builder.Services.AddScoped<IProcessPaymentHandler, ProcessPaymentHandler>();
+builder.Services.AddHostedService<ExpiredReservationsCleanupService>();
 
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 

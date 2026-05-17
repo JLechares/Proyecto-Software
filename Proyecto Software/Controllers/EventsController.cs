@@ -18,8 +18,6 @@ namespace Proyecto_Software.Controllers
         private readonly IGetAllEventsQueryHandler _getAllEventsHandler;
         private readonly IGetSeatsStatusQueryHandler _getSeatsStatusHandler;
         private readonly IGetSectorsByEventQueryHandler _getSectorsByEventHandler;
-        private readonly IReserveSeatCommandHandler _reserveSeatHandler;
-
 
         public EventsController(
             IGetAllEventsQueryHandler getAllEventsHandler,
@@ -30,7 +28,6 @@ namespace Proyecto_Software.Controllers
             _getAllEventsHandler = getAllEventsHandler;
             _getSeatsStatusHandler = getSeatsStatusHandler;
             _getSectorsByEventHandler = getSectorsByEventHandler;
-            _reserveSeatHandler = reserveSeatHandler;
 
         }
 
@@ -62,35 +59,6 @@ namespace Proyecto_Software.Controllers
 
             return Ok(result);
         }
-        [HttpPost("v1/reservations")]
-        public async Task<IActionResult> ReserveSeat([FromBody] ReserveSeatResponse response)
-        {
-            try
-            {
-                var command = new ReserveSeatCommand
-                {
-                    SeatId = response.SeatId,
-                    UserId = response.UserId,
-                };
-
-                var result = await _reserveSeatHandler.HandleAsync(command);
-
-                return StatusCode(201, result);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(409, new
-                {
-                    message = "Lo sentimos, el asiento fue seleccionado por otro usuario hace instantes. Por favor, elegí otro."
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
-            }
-        }
+        
     }
 }

@@ -5,11 +5,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace Infraestructure.BackgroundJobs
 {
-    public class ExpiredReservationsBackgroundService : BackgroundService
+    public class ExpiredReservationsCleanupService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public ExpiredReservationsBackgroundService(IServiceProvider serviceProvider)
+        public ExpiredReservationsCleanupService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
@@ -22,7 +22,7 @@ namespace Infraestructure.BackgroundJobs
 
                 var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 
-                var now = DateTime.UtcNow;
+                var now = DateTime.Now;
                 var expiredReservations = await eventRepository.GetExpiredPendingReservationsAsync(now);
 
                 foreach (var reservation in expiredReservations)
@@ -35,9 +35,23 @@ namespace Infraestructure.BackgroundJobs
                         reservation.Seat.Version += 1;
                         eventRepository.UpdateSeat(reservation.Seat);
                     }
+                    var sector = eventRepository.GetSectorByIdAsync(reservation!.Seat!.SectorId);
+                    SECTOR? sectorResult = await sector!;
 
+                    var eventIdValue = sectorResult?.Id;
+
+                    var metadata = new
+                    {
+                        EventId = eventIdValue,
+                        SectorId = reservation.Seat.SectorId,
+                        SeatId = reservation.Seat.Id,
+                        RequestTimestamp = DateTime.Now
+                    };
+
+                    // 4. Actualizamos la reservación
                     eventRepository.UpdateReservation(reservation);
 
+                    // 5. Guardamos en el log de auditoría usando la variable 'metadata' que ya creamos
                     await eventRepository.AddAuditLogAsync(new AUDIT_LOG
                     {
                         Id = Guid.NewGuid(),
@@ -45,7 +59,8 @@ namespace Infraestructure.BackgroundJobs
                         Action = "RESERVATION_EXPIRED",
                         EntityType = "Reservation",
                         EntityId = reservation.Id.ToString(),
-                        Details = "Reservation expired and seat was released automatically",
+                        // Reutilizamos la variable metadata, así evitas duplicar código
+                        Details = System.Text.Json.JsonSerializer.Serialize(metadata),
                         CreatedAt = now
                     });
                 }
