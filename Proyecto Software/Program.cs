@@ -56,12 +56,10 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-
-    //swagger generator
     app.UseSwagger();
     app.UseSwaggerUI();
 }

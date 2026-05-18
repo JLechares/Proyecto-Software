@@ -49,7 +49,6 @@ namespace Infraestructure.Persistence
                 entity.Property(s => s.Price).HasPrecision(18, 2);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                // A Sector can have many Seats
                 entity.HasMany(s => s.Seats)
                       .WithOne(seat => seat.Sector)
                       .HasForeignKey(seat => seat.SectorId);

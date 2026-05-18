@@ -30,7 +30,7 @@ namespace Application.UseCases.Events.Handlers
                 var sector = await _eventRepository.GetSectorByIdAsync(seat!.SectorId);
                 if (seat != null && seat.Status != "Available")
                 {
-                    actionStatus = "CONFLICT_OCCUPIED"; // Cambiamos el estado para el log
+                    actionStatus = "CONFLICT_OCCUPIED"; 
                     throw new InvalidOperationException("El asiento no está disponible");
                 }
 
@@ -47,7 +47,7 @@ namespace Application.UseCases.Events.Handlers
                     Seat = seat,
                     Status = "Pending",
                     ReservedAt = DateTime.Now,
-                    ExpiresAt = DateTime.Now.AddMinutes(1)
+                    ExpiresAt = DateTime.Now.AddMinutes(5)
                 };
                 await _eventRepository.AddReservationAsync(reservation);
                 

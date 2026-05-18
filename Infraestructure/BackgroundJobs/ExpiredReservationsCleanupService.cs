@@ -48,10 +48,10 @@ namespace Infraestructure.BackgroundJobs
                         RequestTimestamp = DateTime.Now
                     };
 
-                    // 4. Actualizamos la reservación
+                  
                     eventRepository.UpdateReservation(reservation);
 
-                    // 5. Guardamos en el log de auditoría usando la variable 'metadata' que ya creamos
+                    
                     await eventRepository.AddAuditLogAsync(new AUDIT_LOG
                     {
                         Id = Guid.NewGuid(),
@@ -59,7 +59,6 @@ namespace Infraestructure.BackgroundJobs
                         Action = "RESERVATION_EXPIRED",
                         EntityType = "Reservation",
                         EntityId = reservation.Id.ToString(),
-                        // Reutilizamos la variable metadata, así evitas duplicar código
                         Details = System.Text.Json.JsonSerializer.Serialize(metadata),
                         CreatedAt = now
                     });
