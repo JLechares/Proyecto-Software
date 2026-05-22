@@ -19,32 +19,16 @@ namespace Proyecto_Software.Controllers
         [HttpPost("v1/reservations")]
         public async Task<IActionResult> ReserveSeat([FromBody] ReserveSeatResponse response)
         {
-            try
+            var command = new ReserveSeatCommand
             {
-                var command = new ReserveSeatCommand
-                {
-                    SeatId = response.SeatId,
-                    UserId = response.UserId,
-                };
+                SeatId = response.SeatId,
+                UserId = response.UserId,
+            };
 
-                var result = await _reserveSeatHandler.HandleAsync(command);
+            var result = await _reserveSeatHandler.HandleAsync(command);
 
-                return StatusCode(201, result);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(409, new
-                {
-                    message = "Lo sentimos, el asiento fue seleccionado por otro usuario hace instantes. Por favor, elegí otro."
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
-            }
+            return StatusCode(201, result);
+        
         }
     }
 }

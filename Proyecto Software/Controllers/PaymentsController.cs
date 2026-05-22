@@ -19,19 +19,8 @@ namespace Proyecto_Software.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentCommand command)
         {
-            try
-            {
-                var result = await _processPaymentHandler.HandleAsync(command);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var result = await _processPaymentHandler.HandleAsync(command);
+            return Ok(result);
         }
     }
 }

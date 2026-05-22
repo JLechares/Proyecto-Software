@@ -2,9 +2,9 @@
 using Domain.Entities;
 using Infraestructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Collections.Generic;
-using System.Text;
+using Application.Exceptions;
+using System.Data;
+
 
 namespace Infraestructure.Repositories
 {
@@ -17,13 +17,13 @@ namespace Infraestructure.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        public async Task<IApplicationTransaction> BeginTransactionAsync()
         {
-            return await _appDbContext.Database.BeginTransactionAsync();
+            var efCoreTransaction = await _appDbContext.Database.BeginTransactionAsync();
+            return new ApplicationTransaction(efCoreTransaction);   
         }
         public async Task AddAuditLogAsync(AUDIT_LOG log)
         {
-            //_appDbContext.ChangeTracker.Clear();
             await _appDbContext.AUDIT_LOGS.AddAsync(log);
         }
 
@@ -34,7 +34,6 @@ namespace Infraestructure.Repositories
 
         public async Task<IEnumerable<EVENT>> GetAllEventsAsync(int pageNumber, int pageSize)
         {
-            //Se usa sistema de paginación, para cuando sean muchos eventos, sea escalable
             return await _appDbContext.EVENTS
                         .OrderBy(e => e.EventDate)
                         .Skip((pageNumber - 1) * pageSize)
@@ -78,7 +77,15 @@ namespace Infraestructure.Repositories
 
         public async Task<bool> SaveChangesAsync()
         {
-            return await _appDbContext.SaveChangesAsync() > 0;
+            try
+            {
+                return await _appDbContext.SaveChangesAsync() > 0;
+            }
+            catch (ConcurrencyException)
+            {
+                throw new ConcurrencyException("El asiento ya fue modificado o seleccionado por otro usuario.");
+            }
+
         }
 
         public void UpdateSeat(SEAT seat)

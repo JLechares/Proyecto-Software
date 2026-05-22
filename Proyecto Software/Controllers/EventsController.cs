@@ -53,10 +53,6 @@ namespace Proyecto_Software.Controllers
         {
             var query = new GetSeatsStatusQuery(eventId, sectorId);
             var result = await _getSeatsStatusHandler.HandleAsync(query);
-
-            if (result == null || !result.Any())
-                return NotFound($"No se encontraron asientos para el sector {sectorId} en el evento {eventId}");
-
             return Ok(result);
         }
         

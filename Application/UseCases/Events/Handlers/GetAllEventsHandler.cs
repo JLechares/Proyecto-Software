@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.UseCases.Events.Queries;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace Application.UseCases.Events.Handlers

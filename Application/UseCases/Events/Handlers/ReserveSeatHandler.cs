@@ -1,13 +1,11 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using Application.UseCases.Events.Commands;
+using Application.Exceptions;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Text;
-using System.Transactions;
-using Microsoft.EntityFrameworkCore;
+
+
+
 
 namespace Application.UseCases.Events.Handlers
 {
@@ -20,7 +18,7 @@ namespace Application.UseCases.Events.Handlers
         }
         public async Task<ReserveSeatResponse> HandleAsync(ReserveSeatCommand command)
         {
-            using var transaction = await _eventRepository.BeginTransactionAsync();
+            using IApplicationTransaction transaction = await _eventRepository.BeginTransactionAsync();
             var seat = await _eventRepository.GetSeatByIdAsync(command.SeatId);
             
             string actionStatus = "SUCCESS";
@@ -30,7 +28,7 @@ namespace Application.UseCases.Events.Handlers
                 var sector = await _eventRepository.GetSectorByIdAsync(seat!.SectorId);
                 if (seat != null && seat.Status != "Available")
                 {
-                    actionStatus = "CONFLICT_OCCUPIED"; // Cambiamos el estado para el log
+                    actionStatus = "CONFLICT_OCCUPIED"; 
                     throw new InvalidOperationException("El asiento no está disponible");
                 }
 
@@ -61,14 +59,14 @@ namespace Application.UseCases.Events.Handlers
                     SeatId = command.SeatId
                 };
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ConcurrencyException)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollBackAsync();
                 actionStatus = "RESERVE_ATTEMPT";
                 throw;
             }
             catch (Exception) {
-                await transaction.RollbackAsync();
+                await transaction.RollBackAsync();
                 throw;
             }
             finally

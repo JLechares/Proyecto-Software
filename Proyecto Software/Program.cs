@@ -1,10 +1,11 @@
 using Application.Interfaces;
 using Application.UseCases.Events.Handlers;
 using Application.UseCases.Payments.Handlers;
+using Infraestructure.BackgroundJobs;
 using Infraestructure.Persistence;
 using Infraestructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Infraestructure.BackgroundJobs;
+using Proyecto_Software.Middlewares;
 using System.Diagnostics;
 
 
@@ -66,6 +67,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseStaticFiles();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
