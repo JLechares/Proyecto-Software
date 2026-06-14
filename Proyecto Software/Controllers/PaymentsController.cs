@@ -1,12 +1,11 @@
 ﻿using Application.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Application.UseCases.Payments.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Proyecto_Software.Controllers
 {
     [ApiController]
-    [Route("api/v1/payments")]
+    [Route("api/v1/reservations/{reservationId}/payments")]
     public class PaymentsController : ControllerBase
     {
         private readonly IProcessPaymentHandler _processPaymentHandler;
@@ -17,16 +16,21 @@ namespace Proyecto_Software.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentCommand command)
+        public async Task<IActionResult> ProcessPayment(Guid reservationId)
         {
             try
             {
+                var command = new ProcessPaymentCommand
+                {
+                    ReservationId = reservationId
+                };
+
                 var result = await _processPaymentHandler.HandleAsync(command);
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return Conflict(new { message = ex.Message });
             }
             catch (Exception ex)
             {

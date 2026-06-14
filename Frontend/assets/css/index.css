@@ -163,3 +163,30 @@
         border-spacing: 5px;
     }
 
+@media (max-width: 768px) {
+    #cart-container {
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+        z-index: 9999 !important;
+    }
+
+    .cart-item {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .main-container,
+    #main-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 0 auto !important;
+    }
+
+    table {
+        max-width: 100%;
+    }
+}

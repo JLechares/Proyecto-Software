@@ -2,9 +2,6 @@
 using Domain.Entities;
 using Infraestructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infraestructure.Repositories
 {
@@ -17,9 +14,10 @@ namespace Infraestructure.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        public async Task<IAppTransaction> BeginTransactionAsync()
         {
-            return await _appDbContext.Database.BeginTransactionAsync();
+            var transaction = await _appDbContext.Database.BeginTransactionAsync();
+            return new EfAppTransaction(transaction);
         }
         public async Task AddAuditLogAsync(AUDIT_LOG log)
         {

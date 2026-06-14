@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="wwwroot\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -18,14 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Infraestructure\Infraestructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\assets\css\index.css" />
-    <None Include="wwwroot\assets\img\headerBackground.png" />
-    <None Include="wwwroot\assets\js\index.js" />
-    <None Include="wwwroot\index.html" />
-    <None Include="wwwroot\screenView.html" />
   </ItemGroup>
 
 </Project>

@@ -1,17 +1,11 @@
-﻿using Application.DTOs;
-using Application.Interfaces;   
-using Application.UseCases.Events.Commands;
+﻿using Application.Interfaces;   
 using Application.UseCases.Events.Queries;
-using Domain.Entities;
-using Infraestructure.Persistence;
-using Infraestructure.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Proyecto_Software.Controllers
 {
-    [Route("api/")]
+    [Route("api/v1/events")]
     [ApiController]
     public class EventsController : ControllerBase
     {
@@ -19,11 +13,12 @@ namespace Proyecto_Software.Controllers
         private readonly IGetSeatsStatusQueryHandler _getSeatsStatusHandler;
         private readonly IGetSectorsByEventQueryHandler _getSectorsByEventHandler;
 
-        public EventsController(
+        public EventsController
+            (
             IGetAllEventsQueryHandler getAllEventsHandler,
             IGetSeatsStatusQueryHandler getSeatsStatusHandler,
-            IGetSectorsByEventQueryHandler getSectorsByEventHandler,
-            IReserveSeatCommandHandler reserveSeatHandler)
+            IGetSectorsByEventQueryHandler getSectorsByEventHandler
+            )
         {
             _getAllEventsHandler = getAllEventsHandler;
             _getSeatsStatusHandler = getSeatsStatusHandler;
@@ -31,14 +26,14 @@ namespace Proyecto_Software.Controllers
 
         }
 
-        [HttpGet("v1/events")]
+        [HttpGet]
         public async Task<IActionResult> GetAllEvents([FromQuery] GetAllEventsQuery query)
         {
             var events = await _getAllEventsHandler.HandleAsync(query);
             return Ok(events);
         }
 
-        [HttpGet("v1/{eventId}/sectors")]
+        [HttpGet("{eventId}/sectors")]
         public async Task<IActionResult> GetSectors(int eventId)
         {
             var query = new GetSectorsByEventQuery(eventId);
@@ -48,7 +43,7 @@ namespace Proyecto_Software.Controllers
             return Ok(result);
         }
 
-        [HttpGet("v1/{eventId}/sectors/{sectorId}/seats")]
+        [HttpGet("{eventId}/sectors/{sectorId}/seats")]
         public async Task<IActionResult> GetSeats(int eventId, int sectorId)
         {
             var query = new GetSeatsStatusQuery(eventId, sectorId);

@@ -1,11 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
-using Application.UseCases.Events.Commands;
 using Application.UseCases.Payments.Commands;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.UseCases.Payments.Handlers
 {
@@ -25,13 +21,36 @@ namespace Application.UseCases.Payments.Handlers
             {
                 throw new Exception("Reserva no encontrada");
             }
+
             if(reservation.Status != "Pending")
             {
                 throw new InvalidOperationException("La reserva no está pendiente de pago");
             }
+
+            var now = DateTime.UtcNow;
+
+            if (reservation.ExpiresAt <= now)
+            {
+                reservation.Status = "Expired";
+
+                var expiredSeat = await _eventRepository.GetSeatByIdAsync(reservation.SeatId);
+
+                if (expiredSeat != null)
+                {
+                    expiredSeat.Status = "Available";
+                    expiredSeat.Version += 1;
+                    _eventRepository.UpdateSeat(expiredSeat);
+                }
+
+                _eventRepository.UpdateReservation(reservation);
+                await _eventRepository.SaveChangesAsync();
+
+                throw new InvalidOperationException("La reserva ya expiró y no puede ser pagada");
+            }
+
             var seat = await _eventRepository.GetSeatByIdAsync(reservation.SeatId);
             var sector = await _eventRepository.GetSectorByIdAsync(seat!.SectorId);
-            var now = DateTime.Now;
+            
             reservation.Status = "Paid";
 
             seat!.Status = "Sold";
@@ -41,7 +60,7 @@ namespace Application.UseCases.Payments.Handlers
                 EventId = sector!.EventId,
                 SectorId = seat.SectorId,
                 SeatId = seat.Id,
-                RequestTimestamp = DateTime.Now
+                RequestTimestamp = DateTime.UtcNow
             };
 
             _eventRepository.UpdateReservation(reservation);
