@@ -1,126 +1,337 @@
-# 🎟️ Proyecto Software - Sistema de Gestión de Eventos
+# Proyecto Software - Sistema de Reserva de Eventos
 
-Este proyecto es una API desarrollada en **.NET 10** para la gestión de eventos, sectores y reserva de asientos (butacas).  
-Permite consultar información de eventos, visualizar disponibilidad y realizar reservas.
+Este proyecto corresponde a un sistema de reserva de asientos para eventos. Permite visualizar eventos disponibles, consultar sectores y butacas, reservar asientos por un tiempo limitado y confirmar el pago de una reserva.
 
----
-
-## 🧠 Arquitectura
-
-El sistema está estructurado siguiendo principios de **Clean Architecture** junto con el patrón **CQRS (Command Query Responsibility Segregation)**.
-
-### 📁 Application
-Contiene la lógica de la aplicación:
-- DTOs → objetos de respuesta al cliente
-- Interfaces → contratos de repositorios
-- UseCases:
-  - Commands → acciones (ej: reservar asiento)
-  - Queries → consultas
-  - Handlers → lógica que ejecuta cada caso de uso
+El sistema está desarrollado con una API en ASP.NET Core y un frontend separado en HTML, CSS y JavaScript.
 
 ---
 
-### 📁 Domain
-Contiene el modelo del negocio:
-- Entidades principales (Eventos, Sectores, Asientos, etc.)
-- Reglas del sistema
+## Estructura del proyecto
+
+
+Proyecto-Software/
+│
+├── Application/
+│   ├── DTOs/
+│   ├── Interfaces/
+│   └── UseCases/
+│
+├── Domain/
+│   └── Entities/
+│
+├── Infraestructure/
+│   ├── BackgroundJobs/
+│   ├── Migrations/
+│   ├── Persistence/
+│   └── Repositories/
+│
+├── Proyecto Software/
+│   ├── Controllers/
+│   ├── Properties/
+│   ├── Program.cs
+│   └── appsettings.json
+│
+├── Frontend/
+│   ├── assets/
+│   │   ├── css/
+│   │   ├── img/
+│   │   └── js/
+│   ├── index.html
+│   └── screenView.html
+│
+└── README.md
+
 
 ---
 
-### 📁 Infrastructure
-Contiene la implementación técnica:
-- Uso de AppDbContext para modelado de tablas y sus relaciones
-- EventRepository para la comunicacion de BD a los Commands, los Handlers y Queries
+## Arquitectura utilizada
+
+El proyecto está organizado siguiendo una separación por capas:
+
+### Domain
+
+Contiene las entidades principales del negocio:
+
+* EVENT
+* SECTOR
+* SEAT
+* RESERVATION
+* USER
+* AUDIT_LOG
+
+### Application
+
+Contiene la lógica de aplicación, DTOs, interfaces, comandos, queries y handlers.
+
+Esta capa no depende directamente de Entity Framework Core. Para manejar transacciones se utiliza una abstracción propia mediante `IAppTransaction`.
+
+### Infraestructure
+
+Contiene la implementación de persistencia con Entity Framework Core:
+
+* AppDbContext
+* Repositorios
+* Migraciones
+* Background service para liberar reservas expiradas
+
+### Proyecto Software
+
+Es la API principal desarrollada en ASP.NET Core. Expone los endpoints REST y configura Swagger, CORS, inyección de dependencias y conexión a base de datos.
+
+### Frontend
+
+El frontend está separado del backend, como proyecto independiente. Se encuentra en la carpeta `/Frontend` y se ejecuta aparte mediante Live Server o un servidor local.
 
 ---
 
-## 🚀 Ejecución del proyecto
+## Tecnologías utilizadas
 
-## 🛠️ Configuración y Precarga de la Base de Datos (SQL Server)
-
-El proyecto utiliza **SQL Server LocalDB** para el entorno de desarrollo y cuenta con un sistema de **Data Seeding** automático. Al aplicar las migraciones, la base de datos se creará y se rellenará automáticamente con los datos iniciales de prueba para el sistema de reservas.
-
-### Datos Precargados Automáticamente:
-* **Evento:** Concierto de María Becerra en el Estadio River Plate (Programado para el 15/08/2026).
-* **Sectores:** * `VIP` (Id: 1, Precio: $25.000, Capacidad: 50 butacas).
-  * `Preferencial` (Id: 2, Precio: $12.500, Capacidad: 50 butacas).
-* **Butacas:** Se generan automáticamente las 100 butacas del estadio, mapeadas con GUIDs secuenciales fijos, distribuidas equitativamente en filas de 10 asientos por sector y configuradas inicialmente como `Available` (Disponibles).
-* **Usuarios:** Dos usuarios precargados, que son los integrantes del proyecto
- ---
-
-### 🚀 Pasos para levantar la Base de Datos en tu máquina
-
-Para clonar el proyecto y tener todo funcionando con datos de prueba de entrada, seguí estos pasos:
-
-1. **Requisito previo:** Asegurate de tener instalado **SQL Server LocalDB** (se instala de forma predeterminada al cargar el entorno de desarrollo de .NET / Visual Studio).
-2. **Verificar Cadena de Conexión:** El archivo `appsettings.json` de la WebAPI ya viene configurado de forma estándar para apuntar a la instancia local común:
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=EventReservationDB;Trusted_Connection=True;MultipleActiveResultSets=true"
-   }
-3. Ejecutar la Migración y el Seeding: Abre una terminal en la raíz del proyecto (donde se encuentra el archivo de contexto AppDbContext.cs) y ejecuta el comando de Entity Framework:
-
- ```Bash
-dotnet ef database update
- ```
----
-
-## 🌐 Accesos
-
-### 🔹 Swagger (prueba de API)
-https://localhost:7210/swagger/index.html
-
-Permite probar los endpoints:
-- GET (consultas)
-- POST (acciones)
+* ASP.NET Core
+* Entity Framework Core
+* SQL Server LocalDB
+* Swagger / OpenAPI
+* HTML
+* CSS
+* JavaScript
+* Live Server para ejecutar el frontend
 
 ---
 
-### 🔹 Frontend
-https://localhost:7210/index.html
+## Configuración de base de datos
 
-Interfaz web que consume la API mediante JavaScript (fetch) para mostrar y manipular datos.
+La conexión a base de datos se encuentra en:
 
----
 
-## 🔄 Flujo del sistema
+Proyecto Software/appsettings.Development.json
 
-1. El usuario interactúa con el frontend  
-2. El frontend realiza requests a la API  
-3. La API procesa:
-   - Queries → consultas de datos  
-   - Commands → acciones (ej: reservar)  
-4. Se devuelve una respuesta  
-5. El frontend renderiza la información  
 
----
+Cadena de conexión utilizada:
 
-## 📌 Funcionalidades principales
+json
+"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=EventReservationDB;Trusted_Connection=True;MultipleActiveResultSets=true"
 
-- Obtener eventos  
-- Consultar sectores por evento  
-- Visualizar estado de asientos  
-- Reservar asientos  
+
+Para crear o actualizar la base de datos se puede ejecutar desde la consola del Administrador de paquetes NuGet:
+
+powershell
+Update-Database -Project Infraestructure -StartupProject "Proyecto Software"
+
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## Cómo ejecutar el backend
 
-- .NET 10 
-- ASP.NET Core  
-- Swagger  
-- Arquitectura Clean + CQRS  
+1. Abrir la solución `Proyecto Software.sln` en Visual Studio.
+2. Establecer como proyecto de inicio el proyecto `Proyecto Software`.
+3. Ejecutar con el perfil `https`.
+4. Swagger debería abrirse en:
+
+
+https://localhost:7210/swagger
+
+
+La API queda disponible en:
+
+
+https://localhost:7210
+
 
 ---
 
-## 📈 Estado del proyecto
+## Cómo ejecutar el frontend
 
-En desarrollo 🚧  
+El frontend se encuentra en la carpeta:
+
+
+Frontend/
+
+
+Para ejecutarlo:
+
+1. Abrir la carpeta `Frontend` con Visual Studio Code.
+2. Instalar la extensión Live Server.
+3. Abrir `index.html`.
+4. Presionar `Go Live`.
+
+El frontend debería abrirse en una URL similar a:
+
+
+http://127.0.0.1:5500/index.html
+
+
+El archivo `api.js` apunta al backend mediante:
+
+
+const API_BASE_URL = "https://localhost:7210";
+
 
 ---
 
-## 👨‍💻 Autor
+## CORS
 
-Proyecto desarrollado como práctica para la materia **Proyecto de Software**.
-- Juan Bautista Lechares
-- Juan Cruz Merino
+El backend permite solicitudes desde los siguientes orígenes:
+
+
+http://localhost:3000
+http://127.0.0.1:5500
+http://localhost:5500
+
+
+Esto permite levantar el frontend separado del backend.
+
+---
+
+## Endpoints principales
+
+### Eventos
+
+Obtener eventos paginados:
+
+http
+GET /api/v1/events?Page=1&PageSize=10
+
+
+Obtener sectores de un evento:
+
+http
+GET /api/v1/events/{eventId}/sectors
+
+
+Obtener butacas de un sector:
+
+http
+GET /api/v1/events/{eventId}/sectors/{sectorId}/seats
+
+
+---
+
+### Reservas
+
+Crear una reserva:
+
+http
+POST /api/v1/reservations
+
+
+Ejemplo de body:
+
+json
+{
+  "userId": 2,
+  "seatId": "00000000-0000-0000-0000-000000000001"
+}
+
+Respuesta esperada:
+
+json
+{
+  "reservationId": "guid",
+  "userId": 2,
+  "seatId": "guid",
+  "expiresAt": "2026-06-14T07:39:00Z"
+}
+
+
+La reserva queda en estado `Pending` y vence a los 5 minutos.
+
+---
+
+### Pagos
+
+Procesar pago de una reserva:
+
+http
+POST /api/v1/reservations/{reservationId}/payments
+
+
+Respuesta esperada:
+
+json
+{
+  "reservationId": "guid",
+  "reservationStatus": "Paid",
+  "seatId": "guid",
+  "seatStatus": "Sold",
+  "paidAt": "2026-06-14T08:00:00Z"
+}
+
+
+---
+
+## Códigos HTTP utilizados
+
+El proyecto distingue distintos escenarios mediante códigos HTTP:
+
+
+200 OK        → Consulta o pago procesado correctamente.
+201 Created   → Reserva creada correctamente.
+400 BadRequest → Error general o solicitud inválida.
+404 NotFound  → Asiento o recurso no encontrado.
+409 Conflict  → Asiento ocupado, reserva expirada o reserva no disponible para pago.
+
+
+---
+
+## Flujo principal del sistema
+
+1. El usuario visualiza los eventos disponibles.
+2. Selecciona un evento.
+3. El sistema muestra los sectores del evento.
+4. El usuario selecciona una o más butacas disponibles.
+5. Se crea una reserva en estado `Pending`.
+6. El backend devuelve `expiresAt`.
+7. El frontend muestra un timer sincronizado con `expiresAt`.
+8. Si el usuario paga antes del vencimiento:
+
+   * La reserva pasa a `Paid`.
+   * La butaca pasa a `Sold`.
+9. Si la reserva vence:
+
+   * No puede ser pagada.
+   * El sistema libera la butaca mediante el servicio de limpieza de reservas expiradas.
+
+---
+
+## Correcciones realizadas para la reentrega
+
+Se realizaron las siguientes correcciones principales:
+
+* Separación del frontend y backend.
+* Eliminación del uso de `wwwroot` para servir el frontend desde la API.
+* Eliminación de `app.UseStaticFiles()` en `Program.cs`.
+* Corrección de rutas REST.
+* Cambio de rutas de sectores y asientos a una jerarquía basada en eventos.
+* Cambio de pagos a recurso hijo de reservas.
+* Corrección de paginación en eventos.
+* Mejora de códigos HTTP.
+* Agregado de `expiresAt` en la respuesta de reserva.
+* Sincronización del timer del frontend con el vencimiento real de la reserva.
+* Validación para impedir pagar reservas expiradas.
+* Eliminación del campo interno `version` en la respuesta pública de butacas.
+* Reemplazo de `DateTime.Now` por `DateTime.UtcNow`.
+* Eliminación de dependencia directa de Entity Framework Core desde la capa `Application`.
+* Mejora responsive del frontend y del carrito flotante.
+
+---
+
+## Notas de funcionamiento
+
+El carrito del frontend se mantiene en memoria mientras la página está abierta. Si se recarga la página, el carrito visual se pierde, pero la reserva sigue existiendo en el backend hasta que sea pagada o expire.
+
+El backend es responsable de mantener la consistencia de las reservas, estados de butacas y pagos.
+
+---
+
+## Estado actual
+
+El proyecto permite:
+
+* Consultar eventos.
+* Consultar sectores.
+* Consultar butacas por sector.
+* Reservar butacas.
+* Ver el vencimiento real de una reserva.
+* Pagar reservas pendientes.
+* Bloquear pagos de reservas vencidas.
+* Bloquear pagos duplicados.
+* Mostrar estados de butacas como disponibles, reservadas o vendidas.

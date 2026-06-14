@@ -1,14 +1,10 @@
 ﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Application.Interfaces
 {
     public interface IEventRepository
     {
-        Task<IDbContextTransaction> BeginTransactionAsync();
+        Task<IAppTransaction> BeginTransactionAsync();
         Task<IEnumerable<EVENT>> GetAllEventsAsync(int pageNumber, int pageSize);
         Task<IEnumerable<SECTOR>> GetSectorsByEventAsync(int eventId);
         Task<IEnumerable<SEAT>> GetSeatsByEventAndSectorAsync(int eventId, int sectorId);

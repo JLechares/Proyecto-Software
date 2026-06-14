@@ -10,5 +10,6 @@ namespace Application.DTOs
         public Guid ReservationId { get; set; }
         public int UserId { get; set; }
         public Guid SeatId { get; set; }
+        public DateTime ExpiresAt { get; set; }
     }
 }

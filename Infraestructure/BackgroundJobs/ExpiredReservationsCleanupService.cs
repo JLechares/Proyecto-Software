@@ -22,7 +22,7 @@ namespace Infraestructure.BackgroundJobs
 
                 var eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
                 var expiredReservations = await eventRepository.GetExpiredPendingReservationsAsync(now);
 
                 foreach (var reservation in expiredReservations)
@@ -45,7 +45,7 @@ namespace Infraestructure.BackgroundJobs
                         EventId = eventIdValue,
                         SectorId = reservation.Seat.SectorId,
                         SeatId = reservation.Seat.Id,
-                        RequestTimestamp = DateTime.Now
+                        RequestTimestamp = DateTime.UtcNow
                     };
 
                   

@@ -86,7 +86,7 @@ async function generateSeats(eventId) {
                 const seatDiv = document.createElement("div");
 
                 seatDiv.dataset.id = seat.id;
-                seatDiv.textContent = seat.name || " ";
+                seatDiv.textContent = seat.seatNumber ?? seat.name ?? " ";
 
                 // Estilos fijos
                 seatDiv.style.width = "30px";
@@ -150,6 +150,7 @@ function setupConfirmButton() {
 
         let newReservations = [];
         let seatNamesReserved = [];
+        let reservationExpiresAt = null;
 
         for (const id of selectedSeats) {
             if (alreadyReservedInBackend.includes(id)) {
@@ -161,6 +162,19 @@ function setupConfirmButton() {
 
                 if (response.status === 409) {
                     showToast(`La Butaca ${id.toString().substring(33, 36)} ya fue reservada por otro usuario.`, "error");
+                    selectedSeats = selectedSeats.filter(seatId => seatId !== id);
+                    await generateSeats(currentEvent.id);
+                    continue;
+                }
+
+                if (response.status === 404) {
+                    let errorMsg = "Asiento no encontrado.";
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.message || errorMsg;
+                    } catch (e) {}
+
+                    showToast(`Error: ${errorMsg}`, "error");
                     selectedSeats = selectedSeats.filter(seatId => seatId !== id);
                     await generateSeats(currentEvent.id);
                     continue;
@@ -186,6 +200,10 @@ function setupConfirmButton() {
                     const data = await response.json();
                     const resId = data.reservationId || data.id;
 
+                    if (!reservationExpiresAt) {
+                        reservationExpiresAt = data.expiresAt;
+                    }
+
                     if (resId) {
                         newReservations.push(resId);
                         seatNamesReserved.push(`Butaca ${id.toString().substring(33,37)}`);
@@ -208,26 +226,35 @@ function setupConfirmButton() {
             await generateSeats(currentEvent.id);
             showToast("Asientos reservados y añadidos al Carrito Flotante.", "success");
 
-            let timeLeft = 300;
-            const timerInterval = setInterval(() => {
-                timeLeft--;
+            const expirationTime = new Date(reservationExpiresAt).getTime();
 
-                const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                const seconds = (timeLeft % 60).toString().padStart(2, '0');
-                const timeString = `${minutes}:${seconds}`;
+            const timerInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const timeLeft = expirationTime - now;
 
                 const timerDisplay = document.getElementById(`cart-timer-${groupReservationId}`);
-                if (timerDisplay) {
-                    timerDisplay.textContent = `⏱️ ${timeString}`;
-                }
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
+
+                    if (timerDisplay) {
+                        timerDisplay.textContent = "⏱️ Expirada";
+                    }
+
                     cartItem.remove();
                     showToast("El tiempo de una de tus reservas expiró y los asientos se liberaron.", "error");
 
                     alreadyReservedInBackend = alreadyReservedInBackend.filter(id => !newReservations.includes(id));
                     generateSeats(currentEvent.id);
+                    return;
+                }
+
+                const minutes = Math.floor(timeLeft / 1000 / 60).toString().padStart(2, "0");
+                const seconds = Math.floor((timeLeft / 1000) % 60).toString().padStart(2, "0");
+                const timeString = `${minutes}:${seconds}`;
+
+                if (timerDisplay) {
+                    timerDisplay.textContent = `⏱️ ${timeString}`;
                 }
             }, 1000);
 

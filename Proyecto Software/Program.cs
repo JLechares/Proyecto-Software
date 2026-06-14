@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
@@ -45,7 +45,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:5500")
+            policy.WithOrigins(
+                "http://localhost:3000", 
+                "http://127.0.0.1:5500",
+                "http://localhost:5500"
+                )
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -63,7 +67,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
